@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>MOEN OneStop™: Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="/imagine/moen_title_logo.ico"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/cosh/login.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="alert alert-danger collapse mt-3 login-failed-alert" role="alert">
+        username หรือ รหัสผ่านผิด! ต้องการ<a href="/forgetPassword"> <strong>เปลี่ยนรหัสผ่านมั๊ย?</strong></a>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+      <div class="card card-container">
+        <img
+          id="profile-img"
+          class="profile-img-card"
+          src="/imagine/moen_logo.png"
+        />
+        <p id="profile-name" class="profile-name-card"></p>
+        <form class="form-signin" id="signinForm">
+          <span id="reauth-email" class="reauth-email"></span>
+          <input
+            id="inputUsername"
+            class="form-control"
+            placeholder="Username"
+            required
+            autofocus
+          />
+          <input
+            type="password"
+            id="inputPassword"
+            class="form-control"
+            placeholder="Password"
+            required
+          />
+          <button
+            class="btn btn-lg btn-primary btn-block btn-signin"
+            type="submit"
+          >
+            เข้าสู่ระบบ
+          </button>
+        </form>
+        <!-- /form -->
+        <a href="#" class="forgot-password">
+          ลืมรหัสผ่าน?
+        </a>
+      </div>
+      <!-- /card-container -->
+    </div>
+    <!-- /container -->
+
+    <script src="/josh/jquery.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      defer
+      src="https://use.fontawesome.com/releases/v5.10.2/js/all.js"
+      integrity="sha384-QMu+Y+eu45Nfr9fmFOlw8EqjiUreChmoQ7k7C1pFNO8hEbGv9yzsszTmz+RzwyCh"
+      crossorigin="anonymous"
+    ></script>
+    <script src="/josh/login.js"></script>
+  </body>
+</html>
