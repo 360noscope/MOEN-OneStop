@@ -11,6 +11,9 @@ $(document).ready(() => {
       url: "/listOfficer",
       type: "GET"
     },
+    language: {
+      url: "//cdn.datatables.net/plug-ins/1.10.19/i18n/Thai.json"
+    },
     info: false,
     columns: [
       { data: "id" },
@@ -33,6 +36,27 @@ $(document).ready(() => {
         defaultContent:
           "<button class='btn btn-info' id='selectOfficer'>แก้ไข/ลบ</button>"
       }
-    ]
+    ],
+    drawCallback: function(settings) {
+      var api = this.api();
+      var rows = api.rows({ page: "current" }).nodes();
+      var last = null;
+
+      api
+        .column(6, { page: "current" })
+        .data()
+        .each((group, i) => {
+          if (last !== group) {
+            $(rows)
+              .eq(i)
+              .before(
+                '<tr class="group text-center"><td colspan="8"><strong>' +
+                  group +
+                  "</strong></td></tr>"
+              );
+            last = group;
+          }
+        });
+    }
   });
 });

@@ -17,9 +17,9 @@ module.exports = settingEnv => {
         "moen_empposition.PositionName, moen_department.deptName, moen_section.sectionName " +
         "FROM moen_officer " +
         "JOIN moen_workgroup ON moen_officer.workgroupId = moen_workgroup.groupId " +
-        "JOIN moen_emptype ON moen_officer.empTypeId = moen_emptype.typeId " +
-        "JOIN moen_empposition ON moen_officer.posId = moen_empposition.PositionId " +
-        "JOIN moen_department ON moen_workgroup.departmentId = moen_department.deptId "+
+        "JOIN moen_emptype ON moen_officer.empTypeiD = moen_emptype.typeId " +
+        "JOIN moen_empposition ON moen_officer.PositioniD = moen_empposition.PositionId " +
+        "JOIN moen_department ON moen_workgroup.departmentId = moen_department.deptId " +
         "JOIN moen_section ON moen_department.sectionID = moen_section.sectionId",
       (err, results, fields) => {
         if (err) {
@@ -47,5 +47,67 @@ module.exports = settingEnv => {
     );
   };
 
-  return { listOfficer: listOfficer };
+  const getApiPassword = (username, done) => {
+    mysqlPool.query(
+      "SELECT keyPassword, keyNumber FROM apiKey WHERE keyName = ?",
+      [username],
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
+          done(false);
+        } else {
+          if (results.length > 0) {
+            done(results[0]);
+          } else {
+            done(false);
+          }
+        }
+      }
+    );
+  };
+
+  const isUserExists = (username, done) => {
+    mysqlPool.query(
+      "SELECT keyName FROM apiKey WHERE keyName = ?",
+      [username],
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
+          done(false);
+        } else {
+          if (results.length > 0) {
+            done(true);
+          } else {
+            done(false);
+          }
+        }
+      }
+    );
+  };
+
+  const checkAPIUserRole = (keyNumber, done) => {
+    mysqlPool.query(
+      "SELECT permId FROM permGroup WHERE keyNumber = ?",
+      [keyNumber],
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
+          done(false);
+        } else {
+          const permList = [];
+          results.forEach(element => {
+            permList.push(element.permId);
+          });
+          done(permList);
+        }
+      }
+    );
+  };
+
+  return {
+    listOfficer: listOfficer,
+    getApiPassword: getApiPassword,
+    isUserExists: isUserExists,
+    checkAPIUserRole: checkAPIUserRole
+  };
 };

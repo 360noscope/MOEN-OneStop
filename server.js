@@ -7,8 +7,9 @@ const app = express();
 const mustacheExpress = require("mustache-express");
 //custom module
 dotenv.config();
-const auth = require("./modules/Auth")(process.env);
+
 const db = require("./modules/Database")(process.env);
+const auth = require("./modules/Auth")(process.env, db);
 
 app.use(bParser.json()); // to support JSON-encoded bodies
 app.use(
@@ -113,7 +114,96 @@ app.get("/signout", (req, res) => {
   res.render(process.env.LOGIN_PAGE);
 });
 //end - website route section
+
 //start - API route section
+//start API authentication part
+const jwt = require("jsonwebtoken");
+const passport = require("passport");
+const ExtractJwt = require("passport-jwt").ExtractJwt;
+const JwtStrategy = require("passport-jwt").Strategy;
+const lOps = require("./modules/LdapOps")(process.env, db);
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("Bearer"),
+  secretOrKey: process.env.API_SECRET
+};
+
+const jwtAuth = new JwtStrategy(jwtOptions, (payload, done) => {
+  db.isUserExists(payload.kName, result => {
+    if (result) {
+      done(null, true);
+    } else {
+      done(null, false);
+    }
+  });
+});
+
+passport.use(jwtAuth);
+
+const requireJWTAuth = passport.authenticate("jwt", { session: false });
+
+const loginMiddleWare = (req, res, next) => {
+  auth.apiAuth(req.body.keyName, req.body.password, result => {
+    if (result != false) {
+      req.kNumber = result;
+      next();
+    } else {
+      res.send(false);
+    }
+  });
+};
+
+app.post("/apiAuth", loginMiddleWare, (req, res) => {
+  const payload = {
+    kName: req.body.keyName,
+    time: new Date().getHours(),
+    kNumber: req.kNumber
+  };
+  res.send(
+    jwt.sign(payload, process.env.API_SECRET, {
+      expiresIn: process.env.API_TOKEN_EXPIRES
+    })
+  );
+});
+//end API authentication part
+//API Token tester
+app.post("/apiTest", requireJWTAuth, (req, res) => {
+  res.send(true);
+});
+
+//start API part
+//authen AD user
+app.post("/ldapAuth", requireJWTAuth, (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const uObject = jwt.verify(token, process.env.API_SECRET);
+  db.checkAPIUserRole(uObject.kNumber, result => {
+    if (result.includes(1)) {
+      auth.apiLDAPAuth(req.body.username, req.body.password, result => {
+        if (result) {
+          res.send(result);
+        } else {
+          res.send(false);
+        }
+      });
+    } else {
+      res.status(401).send({ message: "This API User not allowed!" });
+    }
+  });
+});
+
+//list AD User
+app.post("/listADUser", requireJWTAuth, (req, res) => {
+  lOps.listUser(req.body.ADToken, result => {
+    res.send(result);
+  });
+});
+//list Organization Unit
+app.post("/listADOu", requireJWTAuth, (req, res) => {
+  lOps.listOU(req.body.ADToken, result => {
+    res.send(result);
+  });
+});
+//end API part
 
 app.listen(80, () => {
   console.log("Web access on http/80");
