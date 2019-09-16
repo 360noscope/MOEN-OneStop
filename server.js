@@ -103,6 +103,61 @@ app.get("/listOfficer", (req, res) => {
     res.render(process.env.LOGIN_PAGE);
   }
 });
+app.get("/manage_api", (req, res) => {
+  if (req.session.authSuccess == true) {
+    if (req.session.isAdmin == true) {
+      res.render(process.env.ADMIN_API_MANAGE, {
+        account_name: `${req.session.firstname}  ${req.session.lastname}`,
+        account_position: req.session.OU,
+        page_name: "API Key Manage"
+      });
+    } else {
+    }
+  } else {
+    res.render(process.env.LOGIN_PAGE);
+  }
+});
+app.post("/listAPIKey", (req, res) => {
+  if (req.session.authSuccess == true) {
+    if (req.session.isAdmin == true) {
+      db.listAPIKey(req.session.UUID, result => {
+        res.send(result);
+      });
+    } else {
+    }
+  } else {
+    res.render(process.env.LOGIN_PAGE);
+  }
+});
+app.post("/apiexists", (req, res) => {
+  if (req.session.authSuccess == true) {
+    if (req.session.isAdmin == true) {
+      db.isAPIExists(req.body.keyName, result => {
+        res.send(result);
+      });
+    } else {
+    }
+  } else {
+    res.render(process.env.LOGIN_PAGE);
+  }
+});
+app.post("/insertApi", (req, res) => {
+  if (req.session.authSuccess == true) {
+    if (req.session.isAdmin == true) {
+      db.insertAPI(
+        req.body.keyName,
+        req.body.keyPassword,
+        req.session.UUID,
+        result => {
+          res.send(result);
+        }
+      );
+    } else {
+    }
+  } else {
+    res.render(process.env.LOGIN_PAGE);
+  }
+});
 app.get("/signout", (req, res) => {
   if (req.session.authSuccess == true) {
     req.session.destroy(err => {
@@ -112,6 +167,12 @@ app.get("/signout", (req, res) => {
     });
   }
   res.render(process.env.LOGIN_PAGE);
+});
+app.use((req, res, next) => {
+  return res.status(404).render("404.html");
+});
+app.use((req, res, next) => {
+  return res.status(500).render("500.html");
 });
 //end - website route section
 
@@ -143,7 +204,7 @@ passport.use(jwtAuth);
 const requireJWTAuth = passport.authenticate("jwt", { session: false });
 
 const loginMiddleWare = (req, res, next) => {
-  auth.apiAuth(req.body.keyName, req.body.password, result => {
+  auth.apiAuth(req.body.keyName, req.body.keyPassword, result => {
     if (result != false) {
       req.kNumber = result;
       next();
@@ -159,11 +220,11 @@ app.post("/apiAuth", loginMiddleWare, (req, res) => {
     time: new Date().getHours(),
     kNumber: req.kNumber
   };
-  res.send(
-    jwt.sign(payload, process.env.API_SECRET, {
+  res.send({
+    API_Token: jwt.sign(payload, process.env.API_SECRET, {
       expiresIn: process.env.API_TOKEN_EXPIRES
     })
-  );
+  });
 });
 //end API authentication part
 //API Token tester
@@ -180,7 +241,7 @@ app.post("/ldapAuth", requireJWTAuth, (req, res) => {
     if (result.includes(1)) {
       auth.apiLDAPAuth(req.body.username, req.body.password, result => {
         if (result) {
-          res.send(result);
+          res.send({ ADToken: result });
         } else {
           res.send(false);
         }
@@ -190,19 +251,19 @@ app.post("/ldapAuth", requireJWTAuth, (req, res) => {
     }
   });
 });
-
 //list AD User
-app.post("/listADUser", requireJWTAuth, (req, res) => {
+app.post("/listUser", requireJWTAuth, (req, res) => {
   lOps.listUser(req.body.ADToken, result => {
-    res.send(result);
+    res.send({ AD_query_result: result });
   });
 });
 //list Organization Unit
-app.post("/listADOu", requireJWTAuth, (req, res) => {
+app.post("/listOU", requireJWTAuth, (req, res) => {
   lOps.listOU(req.body.ADToken, result => {
-    res.send(result);
+    res.send({ AD_query_result: result });
   });
 });
+//search AD user from username
 //end API part
 
 app.listen(80, () => {

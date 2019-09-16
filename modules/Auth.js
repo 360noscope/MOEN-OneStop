@@ -44,9 +44,7 @@ module.exports = (settingEnv, db) => {
                   groupList.includes("Domain Admins");
                 done({
                   authSuccess: true,
-                  UUID: converter.GUIDEncrypt(
-                    converter.GUIDtoUUID(user.objectGUID)
-                  ),
+                  UUID: converter.GUIDtoUUID(user.objectGUID),
                   OU: ouInfo,
                   firstname: user.givenName,
                   lastname: user.sn,

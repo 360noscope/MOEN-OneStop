@@ -1,4 +1,5 @@
 const mysql = require("mysql2");
+const bcrypt = require("bcrypt");
 
 module.exports = settingEnv => {
   const mysqlPool = mysql.createPool({
@@ -42,6 +43,56 @@ module.exports = settingEnv => {
             });
           });
           done(officerList);
+        }
+      }
+    );
+  };
+
+  const listAPIKey = (userId, done) => {
+    mysqlPool.query(
+      "SELECT keyNumber, keyName FROM apiKey WHERE keyOwner = ?",
+      [userId],
+      (err, results, fields) => {
+        if (err) {
+          done(false);
+          console.log(err);
+        } else {
+          done({ data: results });
+        }
+      }
+    );
+  };
+
+  const isAPIExists = (keyName, done) => {
+    mysqlPool.query(
+      "SELECT keyNumber FROM apiKey WHERE keyName = ?",
+      [keyName],
+      (err, results, fields) => {
+        if (err) {
+          done(false);
+          console.log(err);
+        } else {
+          if (results.length > 0) {
+            done({ apiFound: true });
+          } else {
+            done({ apiFound: false });
+          }
+        }
+      }
+    );
+  };
+
+  const insertAPI = (name, password, owner, done) => {
+    const hashedPassword = bcrypt.hashSync(password, 12);
+    mysqlPool.query(
+      "INSERT INTO apiKey (keyOwner, keyName, keyPassword) VALUES(?, ?, ?)",
+      [owner, name, hashedPassword],
+      err => {
+        if (err) {
+          console.log(err);
+          done(false);
+        } else {
+          done(true);
         }
       }
     );
@@ -108,6 +159,9 @@ module.exports = settingEnv => {
     listOfficer: listOfficer,
     getApiPassword: getApiPassword,
     isUserExists: isUserExists,
-    checkAPIUserRole: checkAPIUserRole
+    checkAPIUserRole: checkAPIUserRole,
+    listAPIKey: listAPIKey,
+    isAPIExists: isAPIExists,
+    insertAPI: insertAPI
   };
 };

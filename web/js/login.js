@@ -8,7 +8,7 @@ $(document).on("submit", "#signinForm", e => {
   const password = $("#inputPassword").val();
   $.ajax({
     type: "POST",
-    url: "http://localhost/auth",
+    url: "http://172.19.0.250/auth",
     data: JSON.stringify({ authUsername: username, authPassword: password }),
     contentType: "application/json; charset=utf-8",
     dataType: "json",

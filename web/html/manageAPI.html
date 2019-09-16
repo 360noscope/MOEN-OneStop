@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>MOEN ICT OneStop™: Dashboard</title>
+    <title>MOEN ICT OneStop™: Manage API</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       rel="shortcut icon"
@@ -22,6 +22,11 @@
     <link rel="stylesheet" href="/greedy/Fontawesome5/css/all.css" />
     <link rel="stylesheet" href="/cosh/web_theme.css" />
     <link rel="stylesheet" href="/greedy/AdminLTE/dist/css/AdminLTE.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/greedy/Datatables/datatables.min.css"
+    />
   </head>
   <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
@@ -168,7 +173,7 @@
           <!-- Sidebar Menu -->
           <ul class="sidebar-menu" data-widget="tree">
             <li class="header">จัดการข้อมูล</li>
-            <li class="active">
+            <li>
               <a href="/home">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>
@@ -193,8 +198,8 @@
               </a>
             </li>
             <li class="header">จัดการ API</li>
-            <li>
-              <a href="/manage_api">
+            <li class="active">
+              <a href="/home">
                 <i class="fas fa-key"></i>
                 <span>
                   จัดการ API Access Key
@@ -217,75 +222,135 @@
                 <h1 class="m-0 text-dark">{{ page_name }}</h1>
               </div>
             </div>
-            <!-- /.row -->
-          </div>
-          <!-- /.container-fluid -->
-        </div>
-        <!-- /.content-header -->
-
-        <!-- Main content -->
-        <section class="content">
-          <div class="container-fluid">
-            <!-- Small boxes (Stat box) -->
             <div class="row">
-              <div class="col-md-3 col-sm-6 col-xs-12">
-                <!-- small box -->
-                <div class="info-box">
-                  <span class="info-box-icon bg-aqua"
-                    ><i class="icon ion-md-contacts"></i
-                  ></span>
-                  <div class="info-box-content">
-                    <span class="info-box-text">ข้อมูลเจ้าหน้าที่ในระบบ</span>
-                    <span class="info-box-number">150</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6 col-xs-12">
-                <!-- small box -->
-                <div class="info-box">
-                  <span class="info-box-icon bg-green"
-                    ><i class="icon ion-md-checkmark-circle"></i
-                  ></span>
-                  <div class="info-box-content">
-                    <span class="info-box-text"
-                      >ปริมาณ Ticket ที่ปิดไปแล้ว</span
+              <div class="col-12">
+                <div class="box">
+                  <div class="box-header"></div>
+                  <div class="box-body">
+                    <table
+                      id="keyTable"
+                      class="table table-striped table-bordered"
+                      style="width:100%"
                     >
-                    <span class="info-box-number">150</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6 col-xs-12">
-                <!-- small box -->
-                <div class="info-box">
-                  <span class="info-box-icon bg-yellow"
-                    ><i class="icon ion-md-clock"></i
-                  ></span>
-                  <div class="info-box-content">
-                    <span class="info-box-text">ปริมาณ Ticket ที่ในคิว</span>
-                    <span class="info-box-number">150</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6 col-xs-12">
-                <!-- small box -->
-                <div class="info-box">
-                  <span class="info-box-icon bg-red"
-                    ><i class="icon ion-md-bug"></i
-                  ></span>
-                  <div class="info-box-content">
-                    <span class="info-box-text"
-                      >ปริมาณ Ticket ที่ไม่สำเร็จ</span
+                      <thead>
+                        <tr>
+                          <th class="text-center">ลำดับคีย์</th>
+                          <th class="text-center">ชื่อคีย์</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                    <br />
+                    <button
+                      class="btn btn-success pull-right"
+                      data-toggle="modal"
+                      data-target="#new-key-modal"
+                      type="button"
                     >
-                    <span class="info-box-number">150</span>
+                      เพิ่ม API Key
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-            <!-- /.row -->
           </div>
           <!-- /.container-fluid -->
-        </section>
-        <!-- /.content -->
+        </div>
+        <!-- /.content-header -->
+        <div
+          class="modal fade"
+          id="new-key-modal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="myModalLabel"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button
+                  type="button"
+                  class="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                  <i class="fas fa-key"></i> สร้าง API Key ใหม่
+                </h4>
+              </div>
+              <form method="POST" id="apiForm">
+                <div class="modal-body">
+                  <div id="keyNameBlock" class="form-group">
+                    <label class="control-label"
+                      ><i class="fas fa-file-signature"></i> ชื่อคีย์</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="keyName"
+                      placeholder="ตั้งชื่อที่ใช้ระบุคีย์"
+                    />
+                    <span
+                      id="helpKeyname"
+                      style="display:none"
+                      class="help-block"
+                      >มีชื่อคีย์นี้แล้ว</span
+                    >
+                  </div>
+                  <div id="keypasswordBlock1" class="form-group">
+                    <label class="control-label"
+                      ><i class="fas fa-unlock-alt"></i> รหัสผ่าน</label
+                    >
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="keyPassword"
+                      placeholder="ตั้งรหัสผ่าน"
+                    />
+                    <span
+                      id="helpKeypassword1"
+                      style="display:none"
+                      class="help-block"
+                      >รหัสผ่านทั้งสองช่องไม่ตรงกัน</span
+                    >
+                  </div>
+                  <div id="keypasswordBlock2" class="form-group">
+                    <label class="control-label"
+                      ><i class="fas fa-unlock-alt"></i></i>
+                      ยืนยันรหัสผ่าน</label
+                    >
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="keyPasswordConfirm"
+                      placeholder="กรุณากรอกรหัสผ่านซ้ำ"
+                    />
+                    <span
+                      id="helpKeypassword2"
+                      style="display:none"
+                      class="help-block"
+                      >รหัสผ่านทั้งสองช่องไม่ตรงกัน</span
+                    >
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-default"
+                    data-dismiss="modal"
+                  >
+                    ปิด
+                  </button>
+                  <button type="submit" class="btn btn-warning">
+                    บันทึก
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- /.content-wrapper -->
       <footer class="main-footer">
@@ -314,6 +379,10 @@
     <script src="/greedy/AdminLTE/bower_components/jquery-sparkline/dist/jquery.sparkline.min.js"></script>
     <!-- SlimScroll -->
     <script src="/greedy/AdminLTE/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
-    <script type="text/javascript" src="/josh/home.js"></script>
+    <script
+      type="text/javascript"
+      src="/greedy/Datatables/datatables.min.js"
+    ></script>
+    <script type="text/javascript" src="/josh/manageAPI.js"></script>
   </body>
 </html>

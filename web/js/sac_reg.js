@@ -8,7 +8,7 @@ $(document).ready(() => {
       $(row).addClass("text-center");
     },
     ajax: {
-      url: "/listOfficer",
+      url: "http://172.19.0.250/listOfficer",
       type: "GET"
     },
     language: {
