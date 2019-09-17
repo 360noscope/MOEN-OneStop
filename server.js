@@ -5,16 +5,15 @@ const session = require("express-session");
 const dotenv = require("dotenv");
 const app = express();
 const mustacheExpress = require("mustache-express");
-//custom module
 dotenv.config();
 
-const db = require("./modules/Database")(process.env);
-const auth = require("./modules/Auth")(process.env, db);
+//Customer modules
+const operator = require("./modules/OpsHub")(process.env);
+const auth = require("./modules/Auth")(process.env, operator);
 
-app.use(bParser.json()); // to support JSON-encoded bodies
+app.use(bParser.json());
 app.use(
   bParser.urlencoded({
-    // to support URL-encoded bodies
     extended: true
   })
 );
@@ -31,240 +30,97 @@ app.use("/josh", express.static("web/js"));
 app.use("/cosh", express.static("web/css"));
 app.use("/imagine", express.static("web/img"));
 
-//start - website route section
-app.get("/", (req, res) => {
+/**
+ * Description. checkAuth middleware function for check authentication on every request
+ * and give correct page route for each request
+ * @param {Object} req  Express request object
+ * @param {Object} res Express response object
+ * @param {Function} next Call back function when authen check passed!
+ */
+const checkAuth = (req, res, next) => {
+  const pageList = {
+    "/home_admin": process.env.ADMIN_HOMEPAGE,
+    "/_admin": process.env.ADMIN_HOMEPAGE,
+    "/sac_reg_admin": process.env.ADMIN_SAC_REG,
+    "/manage_api_admin": process.env.ADMIN_API_MANAGE,
+    "/_user": "",
+    "/home_user": ""
+  };
+  const tableRequest = [
+    "/listOfficer",
+    "/apiexists",
+    "/listAPIKey",
+    "/insertApi"
+  ];
+  const logoutRequest = ["/signout"];
+  const way = req.originalUrl;
   if (req.session.authSuccess == true) {
-    if (req.session.isAdmin == true) {
-      res.render(process.env.ADMIN_HOMEPAGE, {
-        account_name: `${req.session.firstname}  ${req.session.lastname}`,
-        account_position: req.session.OU,
-        page_name: "แผงควบคุม"
-      });
-    }
-  } else {
-    res.render(process.env.LOGIN_PAGE);
-  }
-});
-app.post("/auth", (req, res) => {
-  const loginInfo = req.body;
-  auth.login(loginInfo.authUsername, loginInfo.authPassword, result => {
-    if (result.authSuccess == true) {
-      req.session.isAdmin = result.isAdmin;
-      req.session.UUID = result.UUID;
-      req.session.firstname = result.firstname;
-      req.session.lastname = result.lastname;
-      req.session.OU = result.OU;
-    }
-    req.session.authSuccess = result.authSuccess;
-    res.send(
-      JSON.stringify({
-        authSuccess: result.authSuccess
-      })
-    );
-  });
-});
-app.get("/home", (req, res) => {
-  if (req.session.authSuccess == true) {
-    if (req.session.isAdmin == true) {
-      res.render(process.env.ADMIN_HOMEPAGE, {
-        account_name: `${req.session.firstname}  ${req.session.lastname}`,
-        account_position: req.session.OU,
-        page_name: "แผงควบคุม"
-      });
+    if (logoutRequest.includes(way)) {
+      next();
     } else {
-    }
-  } else {
-    res.render(process.env.LOGIN_PAGE);
-  }
-});
-app.get("/sac_reg", (req, res) => {
-  if (req.session.authSuccess == true) {
-    if (req.session.isAdmin == true) {
-      res.render(process.env.ADMIN_SAC_REG, {
-        account_name: `${req.session.firstname}  ${req.session.lastname}`,
-        account_position: req.session.OU,
-        page_name: "Service Access Control"
-      });
-    } else {
-    }
-  } else {
-    res.render(process.env.LOGIN_PAGE);
-  }
-});
-app.get("/listOfficer", (req, res) => {
-  if (req.session.authSuccess == true) {
-    if (req.session.isAdmin == true) {
-      db.listOfficer(qResult => {
-        res.send(qResult);
-      });
-    } else {
-    }
-  } else {
-    res.render(process.env.LOGIN_PAGE);
-  }
-});
-app.get("/manage_api", (req, res) => {
-  if (req.session.authSuccess == true) {
-    if (req.session.isAdmin == true) {
-      res.render(process.env.ADMIN_API_MANAGE, {
-        account_name: `${req.session.firstname}  ${req.session.lastname}`,
-        account_position: req.session.OU,
-        page_name: "API Key Manage"
-      });
-    } else {
-    }
-  } else {
-    res.render(process.env.LOGIN_PAGE);
-  }
-});
-app.post("/listAPIKey", (req, res) => {
-  if (req.session.authSuccess == true) {
-    if (req.session.isAdmin == true) {
-      db.listAPIKey(req.session.UUID, result => {
-        res.send(result);
-      });
-    } else {
-    }
-  } else {
-    res.render(process.env.LOGIN_PAGE);
-  }
-});
-app.post("/apiexists", (req, res) => {
-  if (req.session.authSuccess == true) {
-    if (req.session.isAdmin == true) {
-      db.isAPIExists(req.body.keyName, result => {
-        res.send(result);
-      });
-    } else {
-    }
-  } else {
-    res.render(process.env.LOGIN_PAGE);
-  }
-});
-app.post("/insertApi", (req, res) => {
-  if (req.session.authSuccess == true) {
-    if (req.session.isAdmin == true) {
-      db.insertAPI(
-        req.body.keyName,
-        req.body.keyPassword,
-        req.session.UUID,
-        result => {
-          res.send(result);
+      if (req.session.isAdmin == true) {
+        if (!tableRequest.includes(way)) {
+          req.page = pageList[way + "_admin"];
         }
-      );
-    } else {
+        next();
+      } else {
+        if (!tableRequest.includes(way)) {
+          req.page = pageList[way + "_user"];
+        }
+        next();
+      }
     }
   } else {
     res.render(process.env.LOGIN_PAGE);
   }
-});
-app.get("/signout", (req, res) => {
-  if (req.session.authSuccess == true) {
-    req.session.destroy(err => {
-      if (err) {
-        console.log(err);
+};
+
+/**
+ * Description. checkAPIAuth middleware function for check authentication on API request
+ * @param {Object} req  Express request object
+ * @param {Object} res Express response object
+ * @param {Function} next Call back function when authen check passed!
+ */
+const checkAPIAuth = (req, res, next) => {
+  const authenRequest = ["/apiAuthen"];
+  const requestURL = req.originalUrl;
+  const requestMperm = { "/getUserlist": 1, "/getOUlist": 2, "/ldapLogin": 3 };
+  if (authenRequest.includes(requestURL)) {
+    if (!req.session.apiAuth) {
+      next();
+    } else {
+      res.send({
+        message: "This session already authenticate!",
+        APIloginResult: true
+      });
+    }
+  } else {
+    if (req.session.apiAuth) {
+      const permList = req.session.apiAuthData.permList;
+      if (permList.includes(requestMperm[requestURL])) {
+        next();
+      } else {
+        res.send({
+          message: "This API key not allowed to use selected request",
+          APIResult: false
+        });
       }
-    });
+    } else {
+      res.send({ message: "Not allowed any guest!", APIResult: false });
+    }
   }
-  res.render(process.env.LOGIN_PAGE);
-});
+};
+
+require("./modules/nonPageRoute")(app, operator, checkAuth);
+require("./modules/StandardPageRoute")(app, checkAuth, auth, operator);
+require("./modules/ApiRoute")(app, operator, checkAPIAuth);
+
 app.use((req, res, next) => {
   return res.status(404).render("404.html");
 });
 app.use((req, res, next) => {
   return res.status(500).render("500.html");
 });
-//end - website route section
-
-//start - API route section
-//start API authentication part
-const jwt = require("jsonwebtoken");
-const passport = require("passport");
-const ExtractJwt = require("passport-jwt").ExtractJwt;
-const JwtStrategy = require("passport-jwt").Strategy;
-const lOps = require("./modules/LdapOps")(process.env, db);
-
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("Bearer"),
-  secretOrKey: process.env.API_SECRET
-};
-
-const jwtAuth = new JwtStrategy(jwtOptions, (payload, done) => {
-  db.isUserExists(payload.kName, result => {
-    if (result) {
-      done(null, true);
-    } else {
-      done(null, false);
-    }
-  });
-});
-
-passport.use(jwtAuth);
-
-const requireJWTAuth = passport.authenticate("jwt", { session: false });
-
-const loginMiddleWare = (req, res, next) => {
-  auth.apiAuth(req.body.keyName, req.body.keyPassword, result => {
-    if (result != false) {
-      req.kNumber = result;
-      next();
-    } else {
-      res.send(false);
-    }
-  });
-};
-
-app.post("/apiAuth", loginMiddleWare, (req, res) => {
-  const payload = {
-    kName: req.body.keyName,
-    time: new Date().getHours(),
-    kNumber: req.kNumber
-  };
-  res.send({
-    API_Token: jwt.sign(payload, process.env.API_SECRET, {
-      expiresIn: process.env.API_TOKEN_EXPIRES
-    })
-  });
-});
-//end API authentication part
-//API Token tester
-app.post("/apiTest", requireJWTAuth, (req, res) => {
-  res.send(true);
-});
-
-//start API part
-//authen AD user
-app.post("/ldapAuth", requireJWTAuth, (req, res) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const uObject = jwt.verify(token, process.env.API_SECRET);
-  db.checkAPIUserRole(uObject.kNumber, result => {
-    if (result.includes(1)) {
-      auth.apiLDAPAuth(req.body.username, req.body.password, result => {
-        if (result) {
-          res.send({ ADToken: result });
-        } else {
-          res.send(false);
-        }
-      });
-    } else {
-      res.status(401).send({ message: "This API User not allowed!" });
-    }
-  });
-});
-//list AD User
-app.post("/listUser", requireJWTAuth, (req, res) => {
-  lOps.listUser(req.body.ADToken, result => {
-    res.send({ AD_query_result: result });
-  });
-});
-//list Organization Unit
-app.post("/listOU", requireJWTAuth, (req, res) => {
-  lOps.listOU(req.body.ADToken, result => {
-    res.send({ AD_query_result: result });
-  });
-});
-//search AD user from username
-//end API part
 
 app.listen(80, () => {
   console.log("Web access on http/80");

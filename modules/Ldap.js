@@ -1,7 +1,7 @@
 const ldap = require("ldapjs");
 const converter = require("./LdapConvert");
 const jwt = require("jsonwebtoken");
-module.exports = (settingEnv, db) => {
+module.exports = settingEnv => {
   const listUser = (ADToken, done) => {
     const decryptedToken = jwt.verify(ADToken, settingEnv.API_SECRET);
     const ldapClient = ldap.createClient({

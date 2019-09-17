@@ -2,8 +2,8 @@ const ldap = require("ldapjs");
 const converter = require("./LdapConvert");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-module.exports = (settingEnv, db) => {
-  const login = (username, password, done) => {
+module.exports = (settingEnv, mysqlPool) => {
+  const webLogin = (username, password, done) => {
     const ldapClient = ldap.createClient({
       url: `ldap://${settingEnv.LDAP_SERVER}`
     });
@@ -58,21 +58,45 @@ module.exports = (settingEnv, db) => {
     });
   };
 
-  const apiAuth = (username, password, done) => {
-    db.getApiPassword(username, result => {
-      if (result != false) {
-        if (bcrypt.compareSync(password, result["keyPassword"])) {
-          done(result["keyNumber"]);
-        } else {
+  const apiLogin = (username, password, done) => {
+    mysqlPool.query(
+      "SELECT keyPassword, keyNumber FROM apiKey WHERE keyName = ?",
+      [username],
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
           done(false);
+        } else {
+          if (results.length > 0) {
+            if (bcrypt.compareSync(password, results[0].keyPassword)) {
+              done(results[0]["keyNumber"]);
+            } else {
+              done(false);
+            }
+          } else {
+            done(false);
+          }
         }
-      } else {
-        done(false);
       }
-    });
+    );
   };
 
-  const apiLDAPAuth = (username, password, done) => {
+  const searchCitizen = (uuid, done) => {
+    mysqlPool.query(
+      "SELECT citizenId FROM moen_officer WHERE AD_UUID = ?",
+      [uuid],
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
+          done(false);
+        } else {
+          done(results[0]["citizenId"]);
+        }
+      }
+    );
+  };
+
+  const ldapLogin = (username, password, done) => {
     const ldapClient = ldap.createClient({
       url: `ldap://${settingEnv.LDAP_SERVER}`
     });
@@ -108,28 +132,20 @@ module.exports = (settingEnv, db) => {
                     groupList.push(item.split(",")[0].split("=")[1]);
                   });
                 }
-                const adminRight =
-                  groupList.includes("Administrators") ||
-                  groupList.includes("Domain Admins");
-                const userObject = {
-                  UUID: converter.GUIDEncrypt(
-                    converter.GUIDtoUUID(user.objectGUID)
-                  ),
-                  LdapUsername: username,
-                  LdapPassword: password,
-                  OU: ouInfo,
-                  firstname: user.givenName,
-                  lastname: user.sn,
-                  isAdmin: adminRight
-                };
-                const encryptedUserObj = jwt.sign(
-                  userObject,
-                  settingEnv.API_SECRET,
-                  {
-                    expiresIn: process.env.API_TOKEN_EXPIRES
-                  }
-                );
-                done(encryptedUserObj);
+                searchCitizen(converter.GUIDtoUUID(user.objectGUID), result => {
+                  const adminRight =
+                    groupList.includes("Administrators") ||
+                    groupList.includes("Domain Admins");
+                  const userObject = {
+                    UUID: converter.GUIDtoUUID(user.objectGUID),
+                    citizenId: result,
+                    OU: ouInfo,
+                    firstname: user.givenName,
+                    lastname: user.sn,
+                    isAdmin: adminRight
+                  };
+                  done(userObject);
+                });
               });
             }
           }
@@ -138,5 +154,5 @@ module.exports = (settingEnv, db) => {
     });
   };
 
-  return { login: login, apiAuth: apiAuth, apiLDAPAuth: apiLDAPAuth };
+  return { webLogin: webLogin, apiLogin: apiLogin, ldapLogin: ldapLogin };
 };
