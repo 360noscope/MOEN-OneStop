@@ -2,21 +2,26 @@
 module.exports = (app, operator, checkAuth) => {
   app.post("/auth", (req, res) => {
     const loginInfo = req.body;
-    operator.webLogin(loginInfo.authUsername, loginInfo.authPassword, result => {
-      if (result.authSuccess == true) {
-        req.session.isAdmin = result.isAdmin;
-        req.session.UUID = result.UUID;
-        req.session.firstname = result.firstname;
-        req.session.lastname = result.lastname;
-        req.session.OU = result.OU;
+    operator.webLogin(
+      loginInfo.authUsername,
+      loginInfo.authPassword,
+      result => {
+        if (result.authSuccess == true) {
+          req.session.isAdmin = result.isAdmin;
+          req.session.UUID = result.UUID;
+          req.session.firstname = result.firstname;
+          req.session.lastname = result.lastname;
+          req.session.OU = result.OU;
+        }
+        req.session.authSuccess = result.authSuccess;
+        res.send(
+          JSON.stringify({
+            authSuccess: result.authSuccess,
+            user: loginInfo.authUsername
+          })
+        );
       }
-      req.session.authSuccess = result.authSuccess;
-      res.send(
-        JSON.stringify({
-          authSuccess: result.authSuccess
-        })
-      );
-    });
+    );
   });
   app.get("/listOfficer", checkAuth, (req, res) => {
     operator.listOfficer(qResult => {

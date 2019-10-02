@@ -1,5 +1,7 @@
+const https = require("https");
+const fs = require("fs");
 const express = require("express");
-const wsServer = require("ws").Server;
+const wsServer = require("ws");
 const bParser = require("body-parser");
 const session = require("express-session");
 const dotenv = require("dotenv");
@@ -22,7 +24,11 @@ app.engine("html", mustacheExpress());
 app.set("view engine", "html");
 app.set("views", __dirname + "/web/html/");
 app.use(
-  session({ resave: true, secret: "moenSoCute2019", saveUninitialized: true })
+  session({
+    resave: true,
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: true
+  })
 );
 
 app.use("/greedy", express.static("web/vendor"));
@@ -84,7 +90,14 @@ const checkAuth = (req, res, next) => {
 const checkAPIAuth = (req, res, next) => {
   const authenRequest = ["/apiAuthen"];
   const requestURL = req.originalUrl;
-  const requestMperm = { "/getUserlist": 1, "/getOUlist": 2, "/ldapLogin": 3 };
+  const requestMperm = {
+    "/getUserlist": 1,
+    "/getOUlist": 2,
+    "/ldapLogin": 3,
+    "/addUser": 4,
+    "/getGroupList": 5,
+    "/searchUser": 6
+  };
   if (authenRequest.includes(requestURL)) {
     if (!req.session.apiAuth) {
       next();
@@ -122,16 +135,55 @@ app.use((req, res, next) => {
   return res.status(500).render("500.html");
 });
 
-app.listen(80, () => {
-  console.log("Web access on http/80");
-});
+const httpsServer = https.createServer(
+  {
+    key: fs.readFileSync(__dirname + "/certy/WebSSL.pem"),
+    cert: fs.readFileSync(__dirname + "/certy/WebSSLCert.pem"),
+    passphrase: process.env.CRT_PASS
+  },
+  app
+);
 
-const wss = new wsServer({ port: 3050 }, () => {
-  console.log("Web Socket listen on 3050");
-});
+const wss = new wsServer.Server({ server: httpsServer });
 
-wss.on("connection", socket => {
+wss.on("connection", (socket, incoming_request) => {
+  const connectionId = socket._socket.remoteAddress.replace("::ffff:", "");
+  let paramStr = incoming_request.url;
+  paramStr = paramStr.replace("/", "");
+  paramStr = paramStr.replace("?", "");
+  socket.id = connectionId + "-" + paramStr.split("=")[1];
+  console.log(socket.id + " is connecting in!");
   socket.on("message", message => {
-    console.log("received: %s", message);
+    const msg = JSON.parse(message);
+    switch (msg.action) {
+      case "retreivedData":
+        console.log(
+          "[LOG] client reading card from " + connectionId + "-agent"
+        );
+        wss.clients.forEach(client => {
+          if (client.id == connectionId + "-agent") {
+            client.send(JSON.stringify({ action: "retreivedData", data: "" }));
+          }
+        });
+        break;
+      case "cardData":
+        console.log("[LOG] agent return card data to " + connectionId + "-web");
+        wss.clients.forEach(client => {
+          if (client.id == connectionId + "-web") {
+            client.send(JSON.stringify({ action: "cardData", data: msg.data }));
+          }
+        });
+        break;
+    }
   });
+  socket.on("error", err => {
+    console.log(err);
+  });
+  socket.on("close", (status, reason) => {
+    console.log("Status: " + status + " " + socket.id + " is going away!");
+  });
+});
+
+httpsServer.listen(443, () => {
+  console.log("Listening to HTTPS");
 });

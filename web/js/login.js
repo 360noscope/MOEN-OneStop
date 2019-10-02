@@ -1,6 +1,4 @@
-$(document).ready(() => {
- 
-});
+$(document).ready(() => {});
 
 $(document).on("submit", "#signinForm", e => {
   e.preventDefault();
@@ -8,15 +6,15 @@ $(document).on("submit", "#signinForm", e => {
   const password = $("#inputPassword").val();
   $.ajax({
     type: "POST",
-    url: "http://172.19.0.250/auth",
+    url: "https://172.19.0.250/auth",
     data: JSON.stringify({ authUsername: username, authPassword: password }),
     contentType: "application/json; charset=utf-8",
     dataType: "json",
     success: data => {
       if (data.authSuccess == true) {
-        window.location.replace('/home');
+        window.location.replace("/home");
       } else {
-       $('.login-failed-alert').show();
+        $(".login-failed-alert").show();
       }
     },
     failure: errMsg => {

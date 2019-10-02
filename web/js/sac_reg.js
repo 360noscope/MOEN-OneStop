@@ -1,5 +1,34 @@
-let userTable;
+let userTable, wSocket;
 $(document).ready(() => {
+  wSocket = new WebSocket("wss://172.19.0.250:443/?type=web");
+  wSocket.onmessage = event => {
+    const returnMsg = JSON.parse(event.data);
+    switch (returnMsg.action) {
+      case "cardData":
+        const cardData = returnMsg.data;
+        $("#identityID").val(cardData.id);
+        $("#thaiName").val(
+          cardData.th_prefix +
+            " " +
+            cardData.th_firstname +
+            " " +
+            cardData.th_lastname
+        );
+        $("#engName").val(
+          cardData.eng_prefix +
+            " " +
+            cardData.eng_firstname +
+            " " +
+            cardData.eng_lastname
+        );
+        $("#sex").val(cardData.sex);
+        $("#birthDate").val(cardData.bDate);
+        $("#issueDate").val(cardData.issued_date);
+        $("#expiredDate").val(cardData.expired_date);
+        $("#identPic").attr("src", cardData.picture);
+        break;
+    }
+  };
   userTable = $("#userTable").DataTable({
     paging: true,
     processing: true,
@@ -8,7 +37,7 @@ $(document).ready(() => {
       $(row).addClass("text-center");
     },
     ajax: {
-      url: "http://172.19.0.250/listOfficer",
+      url: "https://172.19.0.250/listOfficer",
       type: "GET"
     },
     language: {
@@ -59,4 +88,9 @@ $(document).ready(() => {
         });
     }
   });
+});
+
+$(document).on("click", "#readCard", e => {
+  e.preventDefault();
+  wSocket.send(JSON.stringify({ action: "retreivedData" }));
 });

@@ -45,14 +45,29 @@ module.exports = settingEnv => {
     Auth.ldapLogin(username, password, done);
   };
 
+  //LDAP section
+  const Ldap = require("./Ldap")(settingEnv, mysqlPool);
+  const listUser = done => {
+    Ldap.listUser(done);
+  };
+  const listOU = done => {
+    Ldap.listOU(done);
+  };
+  const listGroup = done => {
+    Ldap.listGroup(done);
+  };
+  const searchUser = (conditions, done) => {
+    Ldap.searchUser(conditions, done);
+  };
+  const addUser = (userData, done) => {
+    Ldap.addUser(userData, done);
+  };
+
   //Officer Page section
   const Officer = require("./Officer")(mysqlPool);
   const listOfficer = done => {
     Officer.listOfficer(done);
   };
-
-  //ldap section
-  const Ldap = require("./Ldap")(settingEnv);
 
   return {
     listOfficer: listOfficer,
@@ -62,6 +77,11 @@ module.exports = settingEnv => {
     insertAPI: insertAPI,
     webLogin: webLogin,
     apiLogin: apiLogin,
-    ldapLogin: ldapLogin
+    ldapLogin: ldapLogin,
+    listUser: listUser,
+    listOU: listOU,
+    listGroup: listGroup,
+    searchUser: searchUser,
+    addUser: addUser
   };
 };

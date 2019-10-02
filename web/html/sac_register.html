@@ -258,7 +258,13 @@
                         เพิ่มเจ้าหน้าที่ <span class="caret"></span>
                       </button>
                       <ul class="dropdown-menu">
-                        <li id="id-insert"><a href="#">ใช้บัตรประชาชน</a></li>
+                        <li
+                          id="id-insert"
+                          data-toggle="modal"
+                          data-target="#idInsertModal"
+                        >
+                          <a href="#">ใช้บัตรประชาชน</a>
+                        </li>
                         <li id="raw-insert">
                           <a href="#">กรอกข้อมูลผ่านฟอร์ม</a>
                         </li>
@@ -293,17 +299,183 @@
       <!-- /.control-sidebar -->
     </div>
     <!-- ./wrapper -->
+    <div
+      class="modal fade"
+      id="idInsertModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="gridSystemModalLabel"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form method="POST" id="identityForm">
+            <div class="modal-header">
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h4 class="modal-title" id="gridSystemModalLabel">
+                เพิ่มข้อมูลโดยบัตรประขาชน
+              </h4>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-md-3">
+                        <label for="identityID" class="control-label"
+                          >เลขบัตรประชาชน</label
+                        >
+                      </div>
+                      <div class="col-md-7">
+                        <input class="form-control" id="identityID" disabled />
+                      </div>
+                      <div class="col-md-2">
+                        <button
+                          class="btn btn-primary pull-left"
+                          id="readCard"
+                          type="button"
+                        >
+                          อ่านบัตร
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-md-3">
+                        <label for="thaiName" class="control-label"
+                          >ชื่อ-นามสกุล ไทย</label
+                        >
+                      </div>
+                      <div class="col-md-9">
+                        <input class="form-control" id="thaiName" disabled />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <label for="engName" class="control-label"
+                          >ชื่อ-นามสกุล ภาษาอังกฤษ</label
+                        >
+                      </div>
+                      <div class="col-md-8">
+                        <input class="form-control" id="engName" disabled />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-md-1">
+                        <label class="control-label">เพศ</label>
+                      </div>
+                      <div class="col-md-4">
+                        <input class="form-control" id="sex" disabled />
+                      </div>
+                      <div class="col-md-2">
+                        <label class="control-label">วันเกิด</label>
+                      </div>
+                      <div class="col-md-5">
+                        <input class="form-control" id="birthDate" disabled />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <label for="issueDate" class="control-label"
+                          >วันออกบัตร</label
+                        >
+                      </div>
+                      <div class="col-md-3">
+                        <input class="form-control" id="issueDate" disabled />
+                      </div>
+                      <div class="col-md-2">
+                        <label for="expiredDate" class="control-label"
+                          >บัตรหมดอายุ</label
+                        >
+                      </div>
+                      <div class="col-md-4">
+                        <input class="form-control" id="expiredDate" disabled />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3">
+                  <label for="identPic" class="control-label">รูปถ่าย</label>
+                </div>
+                <div class="col-md-9">
+                  <img alt="xD" id="identPic" class="img-responsive" />
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-default"
+                data-dismiss="modal"
+              >
+                ยกเลิก
+              </button>
+              <button type="submit" class="btn btn-success">บันทึก</button>
+            </div>
+          </form>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
 
-    <script src="/josh/jquery.js"></script>
-    <script src="/greedy/AdminLTE/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/josh/jquery.js"></script>
+    <script
+      type="text/javascript"
+      src="/greedy/AdminLTE/bower_components/bootstrap/dist/js/bootstrap.min.js"
+    ></script>
     <!-- FastClick -->
-    <script src="/greedy/AdminLTE/bower_components/fastclick/lib/fastclick.js"></script>
+    <script
+      type="text/javascript"
+      src="/greedy/AdminLTE/bower_components/fastclick/lib/fastclick.js"
+    ></script>
     <!-- AdminLTE App -->
-    <script src="/greedy/AdminLTE/dist/js/adminlte.min.js"></script>
+    <script
+      type="text/javascript"
+      src="/greedy/AdminLTE/dist/js/adminlte.min.js"
+    ></script>
     <!-- Sparkline -->
-    <script src="/greedy/AdminLTE/bower_components/jquery-sparkline/dist/jquery.sparkline.min.js"></script>
+    <script
+      type="text/javascript"
+      src="/greedy/AdminLTE/bower_components/jquery-sparkline/dist/jquery.sparkline.min.js"
+    ></script>
     <!-- SlimScroll -->
-    <script src="/greedy/AdminLTE/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+    <script
+      type="text/javascript"
+      src="/greedy/AdminLTE/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"
+    ></script>
     <script
       type="text/javascript"
       src="/greedy/Datatables/datatables.min.js"

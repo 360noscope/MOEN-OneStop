@@ -6,10 +6,10 @@ module.exports = mysqlPool => {
         "moen_officer.th_lastname, moen_workgroup.groupName, moen_emptype.typeName, " +
         "moen_empposition.PositionName, moen_department.deptName, moen_section.sectionName " +
         "FROM moen_officer " +
-        "JOIN moen_workgroup ON moen_officer.workgroupId = moen_workgroup.groupId " +
+        "JOIN moen_workgroup ON moen_officer.workgroupUUID = moen_workgroup.groupUUID " +
         "JOIN moen_emptype ON moen_officer.empTypeiD = moen_emptype.typeId " +
         "JOIN moen_empposition ON moen_officer.PositioniD = moen_empposition.PositionId " +
-        "JOIN moen_department ON moen_workgroup.departmentId = moen_department.deptId " +
+        "JOIN moen_department ON moen_workgroup.departmentUUID = moen_department.deptUUID " +
         "JOIN moen_section ON moen_department.sectionID = moen_section.sectionId",
       (err, results, fields) => {
         if (err) {

@@ -9,7 +9,7 @@ $(document).ready(() => {
       $(row).addClass("text-center");
     },
     ajax: {
-      url: "http://172.19.0.250/listAPIKey",
+      url: "https://172.19.0.250/listAPIKey",
       type: "POST"
     },
     language: {

@@ -1,11 +1,11 @@
-const ldap = require("ldapjs");
-const converter = require("./LdapConvert");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 module.exports = (settingEnv, mysqlPool) => {
+  const ldap = require("ldapjs");
+  const converter = require("./LdapConvert");
+  const bcrypt = require("bcrypt");
   const webLogin = (username, password, done) => {
     const ldapClient = ldap.createClient({
-      url: `ldap://${settingEnv.LDAP_SERVER}`
+      url: `ldaps://${settingEnv.LDAP_SERVER}`,
+      tlsOptions: { rejectUnauthorized: false }
     });
     const searchOptions = {
       scope: "sub",
@@ -98,7 +98,8 @@ module.exports = (settingEnv, mysqlPool) => {
 
   const ldapLogin = (username, password, done) => {
     const ldapClient = ldap.createClient({
-      url: `ldap://${settingEnv.LDAP_SERVER}`
+      url: `ldaps://${settingEnv.LDAP_SERVER}`,
+      tlsOptions: { rejectUnauthorized: false }
     });
     const searchOptions = {
       scope: "sub",
