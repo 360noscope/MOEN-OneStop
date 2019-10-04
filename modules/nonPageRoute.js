@@ -12,6 +12,7 @@ module.exports = (app, operator, checkAuth) => {
           req.session.firstname = result.firstname;
           req.session.lastname = result.lastname;
           req.session.OU = result.OU;
+          req.session.picture = result.picture;
         }
         req.session.authSuccess = result.authSuccess;
         res.send(
@@ -26,6 +27,21 @@ module.exports = (app, operator, checkAuth) => {
   app.get("/listOfficer", checkAuth, (req, res) => {
     operator.listOfficer(qResult => {
       res.send(qResult);
+    });
+  });
+  app.get("/listSection", checkAuth, (req, res) => {
+    operator.listSection(sResult => {
+      res.send(sResult);
+    });
+  });
+  app.post("/listDept", (req, res) => {
+    operator.listDept(req.body.sectionid, dResult => {
+      res.send(dResult);
+    });
+  });
+  app.post("/listWorkgroup", (req, res) => {
+    operator.listWorkgroup(req.body.deptuuid, wResult => {
+      res.send(wResult);
     });
   });
   app.post("/listAPIKey", checkAuth, (req, res) => {

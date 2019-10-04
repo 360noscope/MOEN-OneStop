@@ -1,4 +1,5 @@
 const https = require("https");
+const http = require("http");
 const fs = require("fs");
 const express = require("express");
 const wsServer = require("ws");
@@ -144,6 +145,7 @@ const httpsServer = https.createServer(
   app
 );
 
+//web socket section!
 const wss = new wsServer.Server({ server: httpsServer });
 
 wss.on("connection", (socket, incoming_request) => {
@@ -174,6 +176,14 @@ wss.on("connection", (socket, incoming_request) => {
           }
         });
         break;
+      case "error":
+        wss.clients.forEach(client => {
+          if (client.id == connectionId + "-web") {
+            client.send(JSON.stringify({ action: "error", data: msg.data }));
+          }
+        });
+
+        break;
     }
   });
   socket.on("error", err => {
@@ -185,5 +195,15 @@ wss.on("connection", (socket, incoming_request) => {
 });
 
 httpsServer.listen(443, () => {
-  console.log("Listening to HTTPS");
+  console.log("[System] listening to HTTPS");
+});
+
+//http redirect
+const httpApp = express();
+httpApp.all("*", (req, res) => {
+  res.redirect(300, "https://172.19.0.250");
+});
+const httpServer = http.createServer(httpApp);
+httpServer.listen(80, () => {
+  console.log("[System] listen for http traffic to redirect to https");
 });

@@ -42,14 +42,32 @@ module.exports = (settingEnv, mysqlPool) => {
                 const adminRight =
                   groupList.includes("Administrators") ||
                   groupList.includes("Domain Admins");
-                done({
-                  authSuccess: true,
-                  UUID: converter.GUIDtoUUID(user.objectGUID),
-                  OU: ouInfo,
-                  firstname: user.givenName,
-                  lastname: user.sn,
-                  isAdmin: adminRight
-                });
+                mysqlPool.query(
+                  "SELECT moen_officer.th_firstname, moen_officer.th_lastname, moen_officer.photoRaw, moen_department.deptName " +
+                    "FROM moen_officer " +
+                    "JOIN moen_workgroup ON moen_officer.workgroupUUID = moen_workgroup.groupUUID " +
+                    "JOIN moen_department ON moen_workgroup.departmentUUID = moen_department.deptUUID " +
+                    "WHERE moen_officer.AD_UUID = ?",
+                  [converter.GUIDtoUUID(user.objectGUID)],
+                  (err, results, fields) => {
+                    if (err) {
+                      console.log("[System] " + err);
+                    } else {
+                      const dbUser = results[0];
+                      done({
+                        authSuccess: true,
+                        UUID: converter.GUIDtoUUID(user.objectGUID),
+                        OU: dbUser.deptName,
+                        //firstname: user.givenName,
+                        firstname: dbUser.th_firstname,
+                        //lastname: user.sn,
+                        lastname: dbUser.th_lastname,
+                        picture: dbUser.photoRaw,
+                        isAdmin: adminRight
+                      });
+                    }
+                  }
+                );
               });
             }
           }

@@ -80,11 +80,12 @@ module.exports = (settingEnv, mysqlPool) => {
                   ] = requiredObj;
                 });
                 search.on("end", () => {
-                  resolveOUName(userResult, results => {
-                    resolveWorkgroup(userResult, workgroupRes => {
+                  done(userResult);
+                  /*resolveOUName(userResult, results => {
+                    resolveWorkgroup(results, workgroupRes => {
                       done(workgroupRes);
                     });
-                  });
+                  });*/
                 });
               }
             }
@@ -411,6 +412,18 @@ module.exports = (settingEnv, mysqlPool) => {
     );
   };
 
+  const encodePassword = password => {
+    var newPassword = "";
+    password = '"' + password + '"';
+    for (var i = 0; i < password.length; i++) {
+      newPassword += String.fromCharCode(
+        password.charCodeAt(i) & 0xff,
+        (password.charCodeAt(i) >>> 8) & 0xff
+      );
+    }
+    return newPassword;
+  };
+
   const addUser = (userData, done) => {
     const ldapClient = ldap.createClient({
       url: `ldaps://${settingEnv.LDAP_SERVER}`,
@@ -435,8 +448,7 @@ module.exports = (settingEnv, mysqlPool) => {
         2
       )}@energy.local`,
       objectCategory: "CN=Person,CN=Schema,CN=Configuration,DC=energy,DC=local",
-      objectClass: ["top", "person", "organizationalPerson", "user"],
-      userPassword: ssha.create(userData.password)
+      objectClass: ["top", "person", "organizationalPerson", "user"]
     };
     ldapClient.bind(
       `${settingEnv.AD_API_ACCOUNT}@energy.local`,
@@ -447,7 +459,31 @@ module.exports = (settingEnv, mysqlPool) => {
             console.log(err);
             done(err);
           } else {
-            done();
+            ldapClient.modify(
+              newDN,
+              [
+                new ldap.Change({
+                  operation: "add",
+                  modification: {
+                    unicodePwd: encodePassword(userData.password)
+                  }
+                }),
+                new ldap.Change({
+                  operation: "replace",
+                  modification: {
+                    userAccountControl: 544
+                  }
+                })
+              ],
+              err => {
+                if (err) {
+                  console.log(err);
+                  done(false);
+                } else {
+                  done();
+                }
+              }
+            );
           }
         });
       }

@@ -37,5 +37,51 @@ module.exports = mysqlPool => {
     );
   };
 
-  return { listOfficer: listOfficer };
+  const listSection = done => {
+    mysqlPool.query(
+      "SELECT sectionId, sectionName FROM moen_section",
+      (err, results, fields) => {
+        if (err) {
+          console.log("[System] " + err);
+        } else {
+          done(results);
+        }
+      }
+    );
+  };
+
+  const listDept = (sect, done) => {
+    mysqlPool.query(
+      "SELECT deptUUID, deptName FROM moen_department WHERE sectionID = ?",
+      [sect],
+      (err, results, fields) => {
+        if (err) {
+          console.log("[System] " + err);
+        } else {
+          done(results);
+        }
+      }
+    );
+  };
+
+  const listWorkgroup = (deptUUID, done) => {
+    mysqlPool.query(
+      "SELECT groupUUID, groupName FROM moen_workgroup WHERE departmentUUID = ?",
+      [deptUUID],
+      (err, results, fields) => {
+        if (err) {
+          console.log("[System] " + err);
+        } else {
+          done(results);
+        }
+      }
+    );
+  };
+
+  return {
+    listOfficer: listOfficer,
+    listSection: listSection,
+    listWorkgroup:listWorkgroup,
+    listDept: listDept
+  };
 };

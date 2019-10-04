@@ -8,6 +8,7 @@ module.exports = (app, checkAuth) => {
     res.render(req.page, {
       account_name: `${req.session.firstname}  ${req.session.lastname}`,
       account_position: req.session.OU,
+      account_picture: req.session.picture,
       page_name: "แผงควบคุม"
     });
   });
@@ -15,6 +16,7 @@ module.exports = (app, checkAuth) => {
     res.render(req.page, {
       account_name: `${req.session.firstname}  ${req.session.lastname}`,
       account_position: req.session.OU,
+      account_picture: req.session.picture,
       page_name: "แผงควบคุม"
     });
   });
@@ -22,6 +24,7 @@ module.exports = (app, checkAuth) => {
     res.render(req.page, {
       account_name: `${req.session.firstname}  ${req.session.lastname}`,
       account_position: req.session.OU,
+      account_picture: req.session.picture,
       page_name: "Service Access Control"
     });
   });
@@ -29,6 +32,7 @@ module.exports = (app, checkAuth) => {
     res.render(req.page, {
       account_name: `${req.session.firstname}  ${req.session.lastname}`,
       account_position: req.session.OU,
+      account_picture: req.session.picture,
       page_name: "API Key Manage"
     });
   });

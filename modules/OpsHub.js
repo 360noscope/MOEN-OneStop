@@ -68,9 +68,21 @@ module.exports = settingEnv => {
   const listOfficer = done => {
     Officer.listOfficer(done);
   };
+  const listSection = done => {
+    Officer.listSection(done);
+  };
+  const listDept = (sect, done) => {
+    Officer.listDept(sect, done);
+  };
+  const listWorkgroup = (dept, done) => {
+    Officer.listWorkgroup(dept, done);
+  };
 
   return {
     listOfficer: listOfficer,
+    listSection: listSection,
+    listDept: listDept,
+    listWorkgroup: listWorkgroup,
     isUserExists: isUserExists,
     checkAPIUserRole: checkAPIUserRole,
     listAPIKey: listAPIKey,
