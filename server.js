@@ -157,7 +157,7 @@ wss.on("connection", (socket, incoming_request) => {
   console.log(socket.id + " is connecting in!");
   socket.on("message", message => {
     const msg = JSON.parse(message);
-    switch (msg.action) {
+    switch (msg.Action) {
       case "retreivedData":
         console.log(
           "[LOG] client reading card from " + connectionId + "-agent"
@@ -172,14 +172,14 @@ wss.on("connection", (socket, incoming_request) => {
         console.log("[LOG] agent return card data to " + connectionId + "-web");
         wss.clients.forEach(client => {
           if (client.id == connectionId + "-web") {
-            client.send(JSON.stringify({ action: "cardData", data: msg.data }));
+            client.send(JSON.stringify({ action: "cardData", data: msg.Data }));
           }
         });
         break;
       case "error":
         wss.clients.forEach(client => {
           if (client.id == connectionId + "-web") {
-            client.send(JSON.stringify({ action: "error", data: msg.data }));
+            client.send(JSON.stringify({ action: "error", data: msg.Data }));
           }
         });
 

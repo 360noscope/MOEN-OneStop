@@ -44,6 +44,31 @@ module.exports = (app, operator, checkAuth) => {
       res.send(wResult);
     });
   });
+  app.get("/listEmployeeType", (req, res) => {
+    operator.listEmployeeType(etResult => {
+      res.send(etResult);
+    });
+  });
+  app.post("/listEmployeeJob", (req, res) => {
+    operator.listEmployeeJob(req.body.typeId, ejResult => {
+      res.send(ejResult);
+    });
+  });
+  app.get("/listEmployeeLevel", (req, res) => {
+    operator.listEmployeeLevel(lResult => {
+      res.send(lResult);
+    });
+  });
+  app.get("/listEmployeePosition", (req, res) => {
+    operator.listEmployeePosition(epResult => {
+      res.send(epResult);
+    });
+  });
+  app.post("/addEmployee", (req, res) => {
+    operator.insertEmployee(req.body.employeeData, aResult => {
+      res.send(aResult);
+    });
+  });
   app.post("/listAPIKey", checkAuth, (req, res) => {
     operator.listAPIKey(req.session.UUID, result => {
       res.send(result);

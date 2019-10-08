@@ -54,16 +54,21 @@ module.exports = (settingEnv, mysqlPool) => {
                       console.log("[System] " + err);
                     } else {
                       const dbUser = results[0];
-                      done({
-                        authSuccess: true,
-                        UUID: converter.GUIDtoUUID(user.objectGUID),
-                        OU: dbUser.deptName,
-                        //firstname: user.givenName,
-                        firstname: dbUser.th_firstname,
-                        //lastname: user.sn,
-                        lastname: dbUser.th_lastname,
-                        picture: dbUser.photoRaw,
-                        isAdmin: adminRight
+                      ldapClient.unbind(err => {
+                        if (err) {
+                          console.log(err);
+                        }
+                        done({
+                          authSuccess: true,
+                          UUID: converter.GUIDtoUUID(user.objectGUID),
+                          OU: dbUser.deptName,
+                          //firstname: user.givenName,
+                          firstname: dbUser.th_firstname,
+                          //lastname: user.sn,
+                          lastname: dbUser.th_lastname,
+                          picture: dbUser.photoRaw,
+                          isAdmin: adminRight
+                        });
                       });
                     }
                   }

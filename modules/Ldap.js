@@ -81,11 +81,6 @@ module.exports = (settingEnv, mysqlPool) => {
                 });
                 search.on("end", () => {
                   done(userResult);
-                  /*resolveOUName(userResult, results => {
-                    resolveWorkgroup(results, workgroupRes => {
-                      done(workgroupRes);
-                    });
-                  });*/
                 });
               }
             }
@@ -95,176 +90,24 @@ module.exports = (settingEnv, mysqlPool) => {
     );
   };
 
-  const promiseOUName = uuid => {
-    return new Promise((resolve, reject) => {
-      let deptList = {};
-      mysqlPool.query(
-        "SELECT deptName, deptUUID FROM moen_department WHERE deptUUID IN (?)",
-        [uuid],
-        (err, results, fields) => {
-          if (err) {
-            console.log(err);
-            reject();
-          } else {
-            results.forEach(row => {
-              deptList[row.deptUUID] = row.deptName;
-            });
-            resolve(deptList);
-          }
+  const resolveOU = (uuid, done) => {
+    listOU(search_result => {
+      search_result.forEach(item => {
+        if (item.UUID == uuid) {
+          done(item.name);
         }
-      );
-    });
-  };
-
-  const promiseGroupName = uuid => {
-    return new Promise((resolve, reject) => {
-      let groupList = {};
-      mysqlPool.query(
-        "SELECT groupName, groupUUID FROM moen_workgroup WHERE groupUUID IN (?)",
-        [uuid],
-        (err, results, fields) => {
-          if (err) {
-            console.log(err);
-            reject();
-          } else {
-            results.forEach(row => {
-              groupList[row.groupUUID] = row.groupName;
-            });
-            resolve(groupList);
-          }
-        }
-      );
-    });
-  };
-
-  const resolveOUName = (userList, done) => {
-    let ouObject = {},
-      searchTest = [],
-      ouFilter = "";
-    //creating OU filter
-    Object.keys(userList).forEach((key, index) => {
-      if (
-        userList[key].hasOwnProperty("OU") &&
-        !ouObject.hasOwnProperty(userList[key]["OU"])
-      ) {
-        ouObject[userList[key]["OU"]] = "";
-        ouFilter += `(ou=${userList[key]["OU"]})`;
-        if (index < 0 && index < Object.keys(userList).length - 1) {
-          ouFilter += ",";
-        }
-      }
-    });
-
-    const ldapClient = ldap.createClient({
-      url: `ldaps://${settingEnv.LDAP_SERVER}`,
-      tlsOptions: { rejectUnauthorized: false }
-    });
-    ldapClient.bind(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD,
-      err => {
-        if (err) {
-        } else {
-          const searchOptions = {
-            scope: "sub",
-            filter: `(&(|${ouFilter})(objectClass=organizationalunit))`
-          };
-          ldapClient.search(
-            "dc=energy,dc=local",
-            searchOptions,
-            (err, search) => {
-              if (err) {
-                console.log(err);
-              } else {
-                search.on("searchEntry", entry => {
-                  const singleObject = entry.object;
-                  ouObject[singleObject["ou"]] = converter.GUIDtoUUID(
-                    singleObject["objectGUID"]
-                  );
-                  searchTest.push(
-                    converter.GUIDtoUUID(singleObject["objectGUID"])
-                  );
-                });
-                search.on("end", () => {
-                  promiseOUName(searchTest).then(result => {
-                    Object.keys(ouObject).forEach((key, index) => {
-                      ouObject[key] = result[ouObject[key]];
-                    });
-                    Object.keys(userList).forEach((key, index) => {
-                      userList[key]["department"] =
-                        ouObject[userList[key]["OU"]];
-                    });
-                    done(userList);
-                  });
-                });
-              }
-            }
-          );
-        }
-      }
-    );
-  };
-
-  const resolveWorkgroup = (userList, done) => {
-    let groupObject = {};
-    Object.keys(userList).forEach((key, index) => {
-      let groupFilter = "",
-        groupSearch = [],
-        groupCounter = 0;
-      const groupList = userList[key]["groups"];
-      groupList.forEach(group => {
-        groupFilter += `(CN=${group})`;
-        if (groupCounter < 0 && groupCounter < groupList.length - 1) {
-          groupFilter += ",";
-        }
-        groupCounter += 1;
       });
-      const ldapClient = ldap.createClient({
-        url: `ldaps://${settingEnv.LDAP_SERVER}`,
-        tlsOptions: { rejectUnauthorized: false }
-      });
-      ldapClient.bind(
-        `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-        settingEnv.AD_API_PASSWORD,
-        err => {
-          if (err) {
-          } else {
-            const searchOptions = {
-              scope: "sub",
-              filter: `(&(objectClass=Group)${groupFilter})`
-            };
-            ldapClient.search(
-              "dc=energy,dc=local",
-              searchOptions,
-              (err, search) => {
-                if (err) {
-                  console.log(err);
-                } else {
-                  search.on("searchEntry", entry => {
-                    const singleObj = entry.object;
-                    groupObject[singleObj.cn] = converter.GUIDtoUUID(
-                      singleObj.objectGUID
-                    );
-                    console.log(groupObject);
-                    groupSearch.push(
-                      converter.GUIDtoUUID(singleObj.objectGUID)
-                    );
-                  });
-                  search.on("end", () => {
-                    promiseGroupName(groupSearch).then(rows => {
-                      /* Object.keys(groupObject).forEach((key, index) => {
-                        groupObject[key] = rows[groupObject[key]];
-                      });*/
-                    });
-                  });
-                }
-              }
-            );
-          }
-        }
-      );
     });
-    done(groupObject);
+  };
+
+  const resolveWorkgroup = (uuid, done) => {
+    listGroup(search_result => {
+      search_result.forEach(item => {
+        if (item.UUID == uuid) {
+          done(item.name);
+        }
+      });
+    });
   };
 
   const listOU = done => {
@@ -412,16 +255,88 @@ module.exports = (settingEnv, mysqlPool) => {
     );
   };
 
+  const searchUserUUID = (firstname, lastname, done) => {
+    const ldapClient = ldap.createClient({
+      url: `ldaps://${settingEnv.LDAP_SERVER}`,
+      tlsOptions: { rejectUnauthorized: false }
+    });
+    let dnString = "dc=energy,dc=local";
+    const searchOptions = {
+      scope: "sub",
+      filter: `(&(objectCategory=person)(objectClass=user)(cn=${firstname} ${lastname}))`
+    };
+    ldapClient.bind(
+      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
+      settingEnv.AD_API_PASSWORD,
+      err => {
+        if (err) {
+        } else {
+          ldapClient.search(dnString, searchOptions, (err, search) => {
+            const userList = [];
+            if (err) {
+              console.log(err);
+              done(false);
+            } else {
+              search.on("searchEntry", entry => {
+                const userObj = entry.object;
+                userList.push({
+                  name: userObj.cn,
+                  UUID: converter.GUIDtoUUID(userObj.objectGUID)
+                });
+              });
+              search.on("end", () => {
+                done(userList[0]);
+              });
+            }
+          });
+        }
+      }
+    );
+  };
+
+  const searchGroupUUID = (groupName, done) => {
+    const ldapClient = ldap.createClient({
+      url: `ldaps://${settingEnv.LDAP_SERVER}`,
+      tlsOptions: { rejectUnauthorized: false }
+    });
+    ldapClient.bind(
+      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
+      settingEnv.AD_API_PASSWORD,
+      err => {
+        if (err) {
+        } else {
+          const searchOptions = {
+            scope: "sub",
+            filter: `(&(objectClass=Group)(cn=${groupName}))`
+          };
+          ldapClient.search(
+            "dc=energy,dc=local",
+            searchOptions,
+            (err, search) => {
+              if (err) {
+                console.log(err);
+              } else {
+                const groupResult = [];
+                search.on("searchEntry", entry => {
+                  const groupObj = entry.object;
+                  groupResult.push({
+                    name: groupObj.cn,
+                    UUID: converter.GUIDtoUUID(groupObj.objectGUID)
+                  });
+                });
+                search.on("end", () => {
+                  done(groupResult[0]);
+                });
+              }
+            }
+          );
+        }
+      }
+    );
+  };
+
   const encodePassword = password => {
-    var newPassword = "";
-    password = '"' + password + '"';
-    for (var i = 0; i < password.length; i++) {
-      newPassword += String.fromCharCode(
-        password.charCodeAt(i) & 0xff,
-        (password.charCodeAt(i) >>> 8) & 0xff
-      );
-    }
-    return newPassword;
+    return new Buffer('"' + password + '"', "utf16le").toString();
   };
 
   const addUser = (userData, done) => {
@@ -429,21 +344,21 @@ module.exports = (settingEnv, mysqlPool) => {
       url: `ldaps://${settingEnv.LDAP_SERVER}`,
       tlsOptions: { rejectUnauthorized: false }
     });
-    const newDN = `cn=${userData.firstname} ${userData.lastname},ou=${userData.workgroup},dc=energy,dc=local`;
+    const newDN = `cn=${userData.Eng_firstname} ${userData.Eng_lastname},ou=${userData.department},dc=energy,dc=local`;
     const newUser = {
-      cn: `${userData.firstname} ${userData.lastname}`,
-      sn: userData.lastname,
-      sAMAccountName: `${userData.firstname}${userData.lastname.substring(
+      cn: `${userData.Eng_firstname} ${userData.Eng_lastname}`,
+      sn: userData.Eng_lastname,
+      sAMAccountName: `${userData.Eng_firstname.toLowerCase()}${userData.Eng_lastname.substring(
         0,
         2
-      )}`,
-      mail: `${userData.firstname}${userData.lastname.substring(
+      ).toLowerCase()}`,
+      mail: `${userData.Eng_firstname}${userData.Eng_lastname.substring(
         0,
         2
       )}@energy.go.th`,
-      givenName: userData.firstname,
-      distinguishedName: `CN=${userData.firstname}${userData.lastname},OU=${userData.workgroup},DC=energy,DC=local`,
-      userPrincipalName: `${userData.firstname}${userData.lastname.substring(
+      givenName: userData.Eng_firstname,
+      distinguishedName: `CN=${userData.Eng_firstname}${userData.Eng_lastname},OU=${userData.department},DC=energy,DC=local`,
+      userPrincipalName: `${userData.Eng_firstname.toLowerCase()}${userData.Eng_lastname.substring(
         0,
         2
       )}@energy.local`,
@@ -477,10 +392,130 @@ module.exports = (settingEnv, mysqlPool) => {
               ],
               err => {
                 if (err) {
-                  console.log(err);
-                  done(false);
+                  ldapClient.unbind(binderr => {
+                    if (err) {
+                      console.log(binderr);
+                      console.log(err);
+                    }
+                    done(false);
+                  });
                 } else {
-                  done();
+                  const groupDn = `CN=${userData.workgroup},OU=${userData.department},DC=energy,DC=local`;
+                  const wifiGroupDn =
+                    "CN=WIFI-STAFF,OU=MOEN-WIFI-Group,DC=energy,DC=local";
+                  const change = new ldap.Change({
+                    operation: "add",
+                    modification: {
+                      member: [newDN]
+                    }
+                  });
+                  ldapClient.modify(groupDn, change, (moderr, res) => {
+                    if (moderr) {
+                      ldapClient.unbind(err => {
+                        done(moderr);
+                      });
+                    } else {
+                      ldapClient.modify(wifiGroupDn, change, (moderr2, res) => {
+                        if (moderr2) {
+                          ldapClient.unbind(err => {
+                            done(moderr2);
+                          });
+                        } else {
+                          searchUserUUID(
+                            userData.Eng_firstname,
+                            userData.Eng_lastname,
+                            user_search_result => {
+                              searchGroupUUID(
+                                userData.workgroup,
+                                group_search_result => {
+                                  ldapClient.unbind(err => {
+                                    if (err) {
+                                      console.log(err);
+                                    }
+                                    const mail = `${
+                                      userData.Eng_firstname
+                                    }${userData.Eng_lastname.substring(
+                                      0,
+                                      2
+                                    )}@energy.go.th`;
+
+                                    Object.keys(userData).forEach(
+                                      (key, index) => {
+                                        if (!userData[key]) {
+                                          userData[key] = null;
+                                        }
+                                      }
+                                    );
+
+                                    mysqlPool.query(
+                                      "INSERT INTO moen_officer (citizenId, AD_UUID, en_prefix, en_firstname, en_lastname, th_prefix, " +
+                                        "th_firstname, th_lastname, workgroupUUID, eMail, empTypeiD, PositioniD, LeveliD, Mobile, Tel, Birthday, " +
+                                        "photoRaw, addHouseNo, addVillageNo, addTambol, addAmphur, addProvince) " +
+                                        "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                      [
+                                        userData.Id,
+                                        user_search_result.UUID,
+                                        userData.Eng_prefix,
+                                        userData.Eng_firstname,
+                                        userData.Eng_lastname,
+                                        userData.Th_prefix,
+                                        userData.Th_firstname,
+                                        userData.Th_lastname,
+                                        group_search_result.UUID,
+                                        mail,
+                                        userData.employee_type,
+                                        userData.employee_position,
+                                        userData.employee_level,
+                                        userData.employee_mobile,
+                                        userData.employee_tel,
+                                        userData.BDate,
+                                        userData.Picture,
+                                        userData.House_no,
+                                        userData.Village_no,
+                                        userData.Tumbol,
+                                        userData.Ampur,
+                                        userData.Province
+                                      ],
+                                      err => {
+                                        if (err) {
+                                          console.log(err);
+                                        } else {
+                                          const selected_system =
+                                            userData.selected_system;
+                                          const test = mysqlPool.query(
+                                            "INSERT INTO moen_App (CitizenID, Email, Eleave, eOffice, eDocPR, eKeep, eCir, Saraban, Vpn, Car) " +
+                                              "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                            [
+                                              userData.Id,
+                                              selected_system.emailSys,
+                                              selected_system.eleaveSys,
+                                              selected_system.eMeetSys,
+                                              selected_system.edocPRSys,
+                                              selected_system.ekeepSys,
+                                              selected_system.ecirSys,
+                                              selected_system.sarabunSys,
+                                              selected_system.vpnSys,
+                                              selected_system.carSys
+                                            ],
+                                            err => {
+                                              if (err) {
+                                                console.log(err);
+                                              }
+                                              done(test.sql);
+                                            }
+                                          );
+                                        }
+                                      }
+                                    );
+                                  });
+                                }
+                              );
+                            }
+                          );
+                        }
+                      });
+                    }
+                  });
                 }
               }
             );
@@ -495,6 +530,10 @@ module.exports = (settingEnv, mysqlPool) => {
     listOU: listOU,
     addUser: addUser,
     listGroup: listGroup,
-    searchUser: searchUser
+    searchUser: searchUser,
+    searchUserUUID: searchUserUUID,
+    searchGroupUUID: searchGroupUUID,
+    resolveOU: resolveOU,
+    resolveWorkgroup: resolveWorkgroup
   };
 };

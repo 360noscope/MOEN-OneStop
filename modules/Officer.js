@@ -78,10 +78,72 @@ module.exports = mysqlPool => {
     );
   };
 
+  const listEmployeeType = done => {
+    mysqlPool.query(
+      "SELECT typeId, typeName FROM moen_emptype",
+      (err, results, fields) => {
+        if (err) {
+          console.log("[System] " + err);
+        } else {
+          done(results);
+        }
+      }
+    );
+  };
+
+  const listEmployeeJob = (emptype, done) => {
+    mysqlPool.query(
+      "SELECT empTypeLevelId, empTypeLevelName FROM moen_emptypelevel WHERE empTypeId = ?",
+      [emptype],
+      (err, results, fields) => {
+        if (err) {
+          console.log("[System ]" + err);
+        } else {
+          done(results);
+        }
+      }
+    );
+  };
+
+  const listEmployeeLevel = done => {
+    mysqlPool.query(
+      "SELECT levelId, levelName FROM moen_emplevel",
+      (err, results, fields) => {
+        if (err) {
+          console.log("[System] " + err);
+        } else {
+          done(results);
+        }
+      }
+    );
+  };
+
+  const listEmployeePosition = done => {
+    mysqlPool.query(
+      "SELECT PositionId, PositionName FROM moen_empposition",
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
+        } else {
+          done(results);
+        }
+      }
+    );
+  };
+
+  const insertEmployee = (employeeData, done) => {
+    
+  };
+
   return {
     listOfficer: listOfficer,
     listSection: listSection,
-    listWorkgroup:listWorkgroup,
-    listDept: listDept
+    listWorkgroup: listWorkgroup,
+    listDept: listDept,
+    listEmployeeType: listEmployeeType,
+    listEmployeeJob: listEmployeeJob,
+    listEmployeeLevel: listEmployeeLevel,
+    listEmployeePosition: listEmployeePosition,
+    insertEmployee: insertEmployee
   };
 };

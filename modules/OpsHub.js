@@ -7,7 +7,8 @@ module.exports = settingEnv => {
     user: settingEnv.MARIA_USERNAME,
     password: settingEnv.MARIA_PASSWORD,
     database: settingEnv.MARIA_DB,
-    port: settingEnv.MARIA_PORT
+    port: settingEnv.MARIA_PORT,
+    multipleStatements: true
   });
 
   //API Page section
@@ -77,12 +78,43 @@ module.exports = settingEnv => {
   const listWorkgroup = (dept, done) => {
     Officer.listWorkgroup(dept, done);
   };
+  const listEmployeeType = done => {
+    Officer.listEmployeeType(done);
+  };
+  const listEmployeeJob = (emptype, done) => {
+    Officer.listEmployeeJob(emptype, done);
+  };
+  const listEmployeeLevel = done => {
+    Officer.listEmployeeLevel(done);
+  };
+  const listEmployeePosition = done => {
+    Officer.listEmployeePosition(done);
+  };
+  const insertEmployee = (employee_data, done) => {
+    Ldap.resolveWorkgroup(employee_data.workgroup, workgroup => {
+      employee_data.workgroup = workgroup;
+      Ldap.resolveOU(employee_data.department, OU => {
+        employee_data.department = OU;
+        employee_data.password =
+          employee_data.Eng_firstname.substring(0, 1).toUpperCase() +
+          employee_data.Eng_lastname.substring(0, 1).toLowerCase() +
+          "@" +
+          employee_data.Id.substring(8, 13);
+        Ldap.addUser(employee_data, done);
+      });
+    });
+  };
 
   return {
     listOfficer: listOfficer,
     listSection: listSection,
     listDept: listDept,
     listWorkgroup: listWorkgroup,
+    listEmployeeType: listEmployeeType,
+    listEmployeeJob: listEmployeeJob,
+    listEmployeeLevel: listEmployeeLevel,
+    listEmployeePosition: listEmployeePosition,
+    insertEmployee: insertEmployee,
     isUserExists: isUserExists,
     checkAPIUserRole: checkAPIUserRole,
     listAPIKey: listAPIKey,

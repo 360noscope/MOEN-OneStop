@@ -1,40 +1,59 @@
-let userTable, wSocket;
+let userTable, wSocket, personData;
 $(document).ready(() => {
-  wSocket = new WebSocket("wss://172.19.0.250:443/?type=web");
-  wSocket.onmessage = event => {
-    const sexName = { 1: "ชาย", 2: "หญิง" };
-    const returnMsg = JSON.parse(event.data);
-    const returnData = returnMsg.data;
-    switch (returnMsg.action) {
-      case "cardData":
-        $("#identityID").val(returnData.id);
-        $("#thaiName").val(
-          returnData.th_prefix +
-            " " +
-            returnData.th_firstname +
-            " " +
-            returnData.th_lastname
-        );
-        $("#engName").val(
-          returnData.eng_prefix +
-            " " +
-            returnData.eng_firstname +
-            " " +
-            returnData.eng_lastname
-        );
-        $("#sex").val(sexName[returnData.sex]);
-        $("#birthDate").val(returnData.bDate);
-        $("#issueDate").val(returnData.issued_date);
-        $("#expiredDate").val(returnData.expired_date);
-        $("#identPic").attr("src", returnData.picture);
-        break;
-      case "error":
-        if (returnData == "NO_READER") {
-          alert("ไม่ได้เสียบเครื่องอ่านหรือยังไม่ได้เสียบการ์ด");
-        }
-        break;
-    }
+  const wsCheck = () => {
+    if (!wSocket || wSocket.readyState === wSocket.CLOSED) startConnection();
   };
+  const startConnection = () => {
+    wSocket = null;
+    wSocket = new WebSocket("wss://172.19.0.250:443/?type=web");
+    wSocket.onopen = event => {
+      console.log("Web socket connected!");
+    };
+    wSocket.onmessage = event => {
+      const sexName = { 1: "ชาย", 2: "หญิง" };
+      const returnMsg = JSON.parse(event.data);
+      const returnData = returnMsg.data;
+      personData = returnData;
+      switch (returnMsg.action) {
+        case "cardData":
+          $("#identityForm button[type=submit]").attr("disabled", false);
+          $("#identityID").val(returnData.Id);
+          $("#thaiName").val(
+            returnData.Th_prefix +
+              " " +
+              returnData.Th_firstname +
+              " " +
+              returnData.Th_lastname
+          );
+          $("#engName").val(
+            returnData.Eng_prefix +
+              " " +
+              returnData.Eng_firstname +
+              " " +
+              returnData.Eng_lastname
+          );
+          $("#sex").val(sexName[returnData.Sex]);
+          $("#birthDate").val(returnData.BDate);
+          $("#issueDate").val(returnData.Issued_date);
+          $("#expiredDate").val(returnData.Expired_date);
+          $("#identPic").attr("src", returnData.Picture);
+          break;
+        case "error":
+          if (returnData == "NO_READER") {
+            $("#identityForm button[type=submit]").attr("disabled", true);
+            alert("ไม่ได้เสียบเครื่องอ่านหรือยังไม่ได้เสียบการ์ด");
+          }
+          break;
+      }
+    };
+    wSocket.onclose = event => {
+      console.log("Web socket closed!");
+      wsCheck();
+    };
+  };
+
+  startConnection();
+  setInterval(startConnection(), 5000);
 
   userTable = $("#userTable").DataTable({
     paging: true,
@@ -99,7 +118,7 @@ $(document).ready(() => {
 
 $(document).on("click", "#readCard", e => {
   e.preventDefault();
-  wSocket.send(JSON.stringify({ action: "retreivedData" }));
+  wSocket.send(JSON.stringify({ Action: "retreivedData" }));
 });
 
 $(document).on("shown.bs.modal", "#idInsertModal", e => {
@@ -194,6 +213,157 @@ $(document).on("shown.bs.modal", "#idInsertModal", e => {
         );
     }
   });
+
+  $.get("https://172.19.0.250/listEmployeeType", (data, status) => {
+    if (data.length > 0) {
+      $("#emptype").attr("disabled", false);
+      $("#emptype")
+        .find("option")
+        .remove()
+        .end();
+      data.forEach(item => {
+        $("#emptype").append(
+          $("<option />")
+            .val(item.typeId)
+            .text(item.typeName)
+        );
+      });
+      const selectedType = $("#emptype option:selected").val();
+      $.post(
+        "https://172.19.0.250/listEmployeeJob",
+        { typeId: selectedType },
+        (data, status) => {
+          if (data.length > 0) {
+            $("#empjob").attr("disabled", false);
+            $("#empjob")
+              .find("option")
+              .remove()
+              .end();
+            data.forEach(item => {
+              $("#empjob").append(
+                $("<option />")
+                  .val(item.empTypeLevelId)
+                  .text(item.empTypeLevelName)
+              );
+            });
+          } else {
+            $("#empjob").attr("disabled", true);
+            $("#empjob")
+              .find("option")
+              .remove()
+              .end()
+              .append(
+                $("<option />")
+                  .val("0")
+                  .text("ไม่มีข้อมูล")
+              );
+          }
+        }
+      );
+    } else {
+      $("#emptype").attr("disabled", true);
+      $("#emptype")
+        .find("option")
+        .remove()
+        .end()
+        .append(
+          $("<option />")
+            .val("0")
+            .text("ไม่มีข้อมูล")
+        );
+    }
+  });
+
+  $.get("https://172.19.0.250/listEmployeeLevel", (data, status) => {
+    if (data.length > 0) {
+      $("#emplevel").attr("disabled", false);
+      $("#emplevel")
+        .find("option")
+        .remove()
+        .end();
+      data.forEach(item => {
+        $("#emplevel").append(
+          $("<option />")
+            .val(item.levelId)
+            .text(item.levelName)
+        );
+      });
+    } else {
+      $("#emplevel").attr("disabled", true);
+      $("#emplevel")
+        .find("option")
+        .remove()
+        .end()
+        .append(
+          $("<option />")
+            .val("0")
+            .text("ไม่มีข้อมูล")
+        );
+    }
+  });
+
+  $.get("https://172.19.0.250/listEmployeePosition", (data, status) => {
+    if (data.length > 0) {
+      $("#emppos").attr("disabled", false);
+      $("#emppos")
+        .find("option")
+        .remove()
+        .end();
+      data.forEach(item => {
+        $("#emppos").append(
+          $("<option />")
+            .val(item.PositionId)
+            .text(item.PositionName)
+        );
+      });
+    } else {
+      $("#emppos").attr("disabled", true);
+      $("#emppos")
+        .find("option")
+        .remove()
+        .end()
+        .append(
+          $("<option />")
+            .val("0")
+            .text("ไม่มีข้อมูล")
+        );
+    }
+  });
+});
+
+$(document).on("change", "#emptype", e => {
+  const selectedType = $("#emptype option:selected").val();
+  $.post(
+    "https://172.19.0.250/listEmployeeJob",
+    { typeId: selectedType },
+    (data, status) => {
+      if (data.length > 0) {
+        $("#empjob").attr("disabled", false);
+        $("#empjob")
+          .find("option")
+          .remove()
+          .end();
+        data.forEach(item => {
+          $("#empjob").append(
+            $("<option />")
+              .val(item.empTypeLevelId)
+              .text(item.empTypeLevelName)
+          );
+        });
+      } else {
+        $("#empjob").attr("disabled", true);
+        $("#empjob")
+          .find("option")
+          .remove()
+          .end()
+          .append(
+            $("<option />")
+              .val("0")
+              .text("ไม่มีข้อมูล")
+          );
+      }
+    }
+  );
 });
 
 $(document).on("change", "#section", () => {
@@ -296,4 +466,56 @@ $(document).on("change", "#department", () => {
       }
     }
   );
+});
+
+$(document).on("hidden.bs.modal", "#idInsertModal", e => {
+  personData = null;
+  $("#identityForm")
+    .find("input")
+    .val("");
+  $("#identityForm")
+    .find("select")
+    .find("option")
+    .remove()
+    .end();
+  $("#identityForm")
+    .find("input[type=checkbox]")
+    .prop("checked", false);
+  $("#identPic").attr("src", "");
+});
+
+$(document).on("submit", "#identityForm", e => {
+  e.preventDefault();
+  personData.section = $("#section option:selected").val();
+  personData.department = $("#department option:selected").val();
+  personData.workgroup = $("#workgroup option:selected").val();
+  personData.employee_type = $("#emptype option:selected").val();
+  personData.employee_job = $("#empjob option:selected").val();
+  personData.employee_level = $("#emplevel option:selected").val();
+  personData.employee_position = $("#emppos option:selected").val();
+  personData.employee_mobile = $("#userMobile").val();
+  personData.employee_tel = $("#userTel").val();
+  const enabled_system = {
+    emailSys: $("#emailsys").is(":checked") & 1,
+    eleaveSys: $("#leavesys").is(":checked") & 1,
+    edocPRSys: $("#eDocPRsys").is(":checked") & 1,
+    ekeepSys: $("#eDocKeepsys").is(":checked") & 1,
+    ecirSys: $("#eDocCirsys").is(":checked") & 1,
+    sarabunSys: $("#esarabunsys").is(":checked") & 1,
+    eMeetSys: $("#eMeetsys").is(":checked") & 1,
+    vpnSys: $("#vpnsys").is(":checked") & 1,
+    carSys: $("#carsys").is(":checked") & 1
+  };
+  personData.selected_system = enabled_system;
+  if (personData != null) {
+    $.post(
+      "https://172.19.0.250/addEmployee",
+      { employeeData: personData },
+      (data, status) => {
+        $('#idInsertModal').modal('hide')
+        userTable.ajax.reload();
+      }
+    );
+  } else {
+  }
 });

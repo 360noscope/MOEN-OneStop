@@ -142,12 +142,6 @@
                   </li>
                 </ul>
               </li>
-              <!-- Control Sidebar Toggle Button -->
-              <li>
-                <a href="#" data-toggle="control-sidebar"
-                  ><i class="fa fa-gears"></i
-                ></a>
-              </li>
             </ul>
           </div>
         </nav>
@@ -429,6 +423,28 @@
                   </div>
                 </div>
               </div>
+              <div class="row col-md-12">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label for="userMobile" class="control-label"
+                        >เบอร์มือถือ</label
+                      >
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" id="userMobile" />
+                    </div>
+                    <div class="col-md-2">
+                      <label for="userTel" class="control-label"
+                        >เบอร์โทรศัพท์บ้าน</label
+                      >
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" id="userTel" />
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="row">
                 <div class="col-md-3">
                   <label for="identPic" class="control-label">รูปถ่าย</label>
@@ -486,12 +502,12 @@
                     <select class="form-control" id="emptype"></select>
                   </div>
                   <div class="col-md-2">
-                    <label for="emppos" class="control-label"
-                      >ตำแหน่งเจ้าหน้าที่</label
+                    <label for="empjob" class="control-label"
+                      >ประเภทสายงาน</label
                     >
                   </div>
                   <div class="col-md-4">
-                    <select class="form-control" id="emppos"></select>
+                    <select class="form-control" id="empjob"></select>
                   </div>
                 </div>
               </div>
@@ -504,6 +520,12 @@
                   </div>
                   <div class="col-md-4">
                     <select class="form-control" id="emplevel"></select>
+                  </div>
+                  <div class="col-md-2">
+                    <label for="emppos" class="control-label">ตำแหน่งงาน</label>
+                  </div>
+                  <div class="col-md-4">
+                    <select class="form-control" id="emppos"></select>
                   </div>
                 </div>
               </div>
@@ -593,7 +615,9 @@
               >
                 ยกเลิก
               </button>
-              <button type="submit" class="btn btn-success">บันทึก</button>
+              <button type="submit" class="btn btn-success" disabled>
+                บันทึก
+              </button>
             </div>
           </form>
         </div>
