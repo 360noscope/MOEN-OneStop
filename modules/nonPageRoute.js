@@ -1,8 +1,10 @@
 /**@module nonPageRoute*/
-module.exports = (app, operator, checkAuth) => {
+module.exports = app => {
   const redis = require("redis");
   const redisClient = redis.createClient(6379);
   const Promise = require("promise");
+  const sessionChecker = require("./CheckSession");
+  const operator = require("./OpsHub");
 
   const checkCache = key => {
     return new Promise((resolve, reject) => {
@@ -10,14 +12,18 @@ module.exports = (app, operator, checkAuth) => {
         if (err) {
           reject(err);
         } else {
-          resolve(data);
+          if (data) {
+            resolve(JSON.parse(data));
+          } else {
+            resolve(null);
+          }
         }
       });
     });
   };
   const updateCache = (key, data) => {
     return new Promise((resolve, reject) => {
-      redisClient.setex(key, 3600, data);
+      redisClient.setex(key, 3600, JSON.stringify(data));
       resolve();
     });
   };
@@ -31,8 +37,7 @@ module.exports = (app, operator, checkAuth) => {
     if (result === null) result = [];
     return result;
   };
-
-  const handleNonPageRequest = (req, res) => {
+  const handleFormRequest = (req, res) => {
     const keyList = {
       "/listOfficer": {
         redisKey: "datatables:userlist",
@@ -60,6 +65,19 @@ module.exports = (app, operator, checkAuth) => {
         redisKey: "droplist:employeejob:typeId:",
         fetchMethod: operator.listEmployeeJob,
         selective: "typeId"
+      },
+      "/listEmployeeLevel": {
+        redisKey: "droplist:employeelevel",
+        fetchMethod: operator.listEmployeeLevel
+      },
+      "/listEmployeePosition": {
+        redisKey: "droplist:listemployeeposition",
+        fetchMethod: operator.listEmployeePosition
+      },
+      "/resolveEmployee": {
+        redisKey: "form:uuid:",
+        fetchMethod: operator.resolveOfficer,
+        selective: "uuid"
       }
     };
     let req_url = req.originalUrl;
@@ -74,17 +92,17 @@ module.exports = (app, operator, checkAuth) => {
     checkCache(redisKey)
       .then(data => {
         if (data) {
-          res.send(JSON.parse(data));
+          res.send(data);
         } else {
           if (checkMethodArgs(keyList[req_url]["fetchMethod"]).length == 0) {
             keyList[req_url]["fetchMethod"]().then(search_result => {
-              updateCache(redisKey, JSON.stringify(search_result));
+              updateCache(redisKey, search_result);
               res.send(search_result);
             });
           } else {
             const reqParam = req.body;
             keyList[req_url]["fetchMethod"](reqParam).then(search_result => {
-              updateCache(redisKey, JSON.stringify(search_result));
+              updateCache(redisKey, search_result);
               res.send(search_result);
             });
           }
@@ -94,67 +112,67 @@ module.exports = (app, operator, checkAuth) => {
         console.error("[System] " + err);
       });
   };
+  const handleAuthenRequest = (req, res) => {
+    operator
+      .webLogin(req.body.authUsername, req.body.authPassword)
+      .then(user => {
+        const userObject = {
+          isAdmin: user.isAdmin,
+          UUID: user.UUID,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          OU: user.OU,
+          picture: user.picture
+        };
+        req.session.userObject = userObject;
+        res.send({ loginStatus: true });
+      })
+      .catch(err => {
+        console.error("[System] " + err);
+        res.send({ loginStatus: false });
+      });
+  };
 
-  app.post("/auth", (req, res) => {
-    const loginInfo = req.body;
-    operator.webLogin(
-      loginInfo.authUsername,
-      loginInfo.authPassword,
-      result => {
-        if (result.authSuccess == true) {
-          req.session.isAdmin = result.isAdmin;
-          req.session.UUID = result.UUID;
-          req.session.firstname = result.firstname;
-          req.session.lastname = result.lastname;
-          req.session.OU = result.OU;
-          req.session.picture = result.picture;
-        }
-        req.session.authSuccess = result.authSuccess;
-        res.send({
-          authSuccess: result.authSuccess,
-          user: loginInfo.authUsername
-        });
+  app.post("/auth", handleAuthenRequest);
+  app.get("/signout", sessionChecker.checkAuth, (req, res) => {
+    req.session.destroy(err => {
+      if (err) {
+        console.log(err);
       }
-    );
-  });
-  app.get("/listOfficer", checkAuth, handleNonPageRequest);
-  app.get("/listSection", checkAuth, handleNonPageRequest);
-  app.post("/listDept", checkAuth, handleNonPageRequest);
-  app.post("/listWorkgroup", checkAuth, handleNonPageRequest);
-  app.get("/listEmployeeType", checkAuth, handleNonPageRequest);
-  app.post("/listEmployeeJob", checkAuth, handleNonPageRequest);
-  
-  app.get("/listEmployeeLevel", (req, res) => {
-    operator.listEmployeeLevel(lResult => {
-      res.send(lResult);
+      res.set({
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0"
+      });
+      res.render(process.env.LOGIN_PAGE);
     });
   });
-  app.get("/listEmployeePosition", (req, res) => {
-    operator.listEmployeePosition(epResult => {
-      res.send(epResult);
-    });
-  });
-  app.post("/addEmployee", (req, res) => {
+  app.get("/listOfficer", sessionChecker.checkAuth, handleFormRequest);
+  app.get("/listSection", sessionChecker.checkAuth, handleFormRequest);
+  app.post("/listDept", sessionChecker.checkAuth, handleFormRequest);
+  app.post("/listWorkgroup", sessionChecker.checkAuth, handleFormRequest);
+  app.get("/listEmployeeType", sessionChecker.checkAuth, handleFormRequest);
+  app.post("/listEmployeeJob", sessionChecker.checkAuth, handleFormRequest);
+  app.get("/listEmployeeLevel", sessionChecker.checkAuth, handleFormRequest);
+  app.get("/listEmployeePosition", sessionChecker.checkAuth, handleFormRequest);
+  app.post("/addEmployee", sessionChecker.checkAuth, (req, res) => {
     operator.insertEmployee(req.body.employeeData, aResult => {
       res.send(aResult);
     });
   });
-  app.post("/resolveEmployee", (req, res) => {
-    operator.resolveOfficer(req.body.uuid, resolve_result => {
-      res.send(resolve_result);
-    });
-  });
-  app.post("/listAPIKey", checkAuth, (req, res) => {
+  app.post("/resolveEmployee", sessionChecker.checkAuth, handleFormRequest);
+
+  app.post("/listAPIKey", sessionChecker.checkAuth, (req, res) => {
     operator.listAPIKey(req.session.UUID, result => {
       res.send(result);
     });
   });
-  app.post("/apiexists", checkAuth, (req, res) => {
+  app.post("/apiexists", sessionChecker.checkAuth, (req, res) => {
     operator.isAPIExists(req.body.keyName, result => {
       res.send(result);
     });
   });
-  app.post("/insertApi", (req, res) => {
+  app.post("/insertApi", sessionChecker.checkAuth, (req, res) => {
     operator.insertAPI(
       req.body.keyName,
       req.body.keyPassword,
@@ -163,13 +181,5 @@ module.exports = (app, operator, checkAuth) => {
         res.send(result);
       }
     );
-  });
-  app.get("/signout", checkAuth, (req, res) => {
-    req.session.destroy(err => {
-      if (err) {
-        console.log(err);
-      }
-      res.render(process.env.LOGIN_PAGE);
-    });
   });
 };

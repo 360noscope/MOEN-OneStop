@@ -294,7 +294,7 @@
       role="dialog"
       aria-labelledby="gridSystemModalLabel"
     >
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <form method="POST" id="identityForm">
             <div class="modal-header">
@@ -627,7 +627,7 @@
       role="dialog"
       aria-labelledby="gridSystemModalLabel"
     >
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <form method="POST" id="identityUpdateForm">
             <div class="modal-header">
@@ -649,79 +649,65 @@
                   <h4>ข้อมูลบัตรประชาชน</h4>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-3">
-                        <label for="identityID" class="control-label"
-                          >เลขบัตรประชาชน</label
-                        >
-                      </div>
-                      <div class="col-md-7">
-                        <input class="form-control" name="identityID" disabled />
-                      </div>
-                      <div class="col-md-2">
-                        <button
-                          class="btn btn-primary pull-left"
-                          id="readCard"
-                          type="button"
-                        >
-                          อ่านบัตร
-                        </button>
-                      </div>
+              <div class="row col-md-12">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label for="identityID" class="control-label"
+                        >เลขบัตรประชาชน</label
+                      >
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" name="identityID" disabled />
+                    </div>
+                    <div class="col-md-6">
+                      <button
+                        class="btn btn-primary pull-right"
+                        id="readCard"
+                        type="button"
+                      >
+                        อ่านบัตร
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-3">
-                        <label for="thaiName" class="control-label"
-                          >ชื่อ-นามสกุล ไทย</label
-                        >
-                      </div>
-                      <div class="col-md-9">
-                        <input class="form-control" name="thaiName" disabled />
-                      </div>
+              <div class="row col-md-12">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label for="thaiName" class="control-label"
+                        >ชื่อ-นามสกุล ไทย</label
+                      >
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" name="thaiName" disabled />
+                    </div>
+                    <div class="col-md-2">
+                      <label for="engName" class="control-label"
+                        >ชื่อ-นามสกุล ภาษาอังกฤษ</label
+                      >
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" name="engName" disabled />
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-4">
-                        <label for="engName" class="control-label"
-                          >ชื่อ-นามสกุล ภาษาอังกฤษ</label
-                        >
-                      </div>
-                      <div class="col-md-8">
-                        <input class="form-control" name="engName" disabled />
-                      </div>
+              <div class="row col-md-12">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-1">
+                      <label class="control-label">เพศ</label>
                     </div>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-1">
-                        <label class="control-label">เพศ</label>
-                      </div>
-                      <div class="col-md-4">
-                        <input class="form-control" name="sex" disabled />
-                      </div>
-                      <div class="col-md-2">
-                        <label class="control-label">วันเกิด</label>
-                      </div>
-                      <div class="col-md-5">
-                        <input class="form-control" name="birthDate" disabled />
-                      </div>
+                    <div class="col-md-4">
+                      <input class="form-control" name="sex" disabled />
+                    </div>
+                    <div class="col-md-1">
+                      <label class="control-label">วันเกิด</label>
+                    </div>
+                    <div class="col-md-6">
+                      <input class="form-control" name="birthDate" disabled />
                     </div>
                   </div>
                 </div>
@@ -734,7 +720,7 @@
                         >เบอร์มือถือ</label
                       >
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                       <input class="form-control" name="userMobile" />
                     </div>
                     <div class="col-md-2">
@@ -742,7 +728,7 @@
                         >เบอร์โทรศัพท์บ้าน</label
                       >
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                       <input class="form-control" name="userTel" />
                     </div>
                   </div>
@@ -918,7 +904,7 @@
               >
                 ยกเลิก
               </button>
-              <button type="submit" class="btn btn-success" disabled>
+              <button type="submit" class="btn btn-success">
                 บันทึก
               </button>
             </div>

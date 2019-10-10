@@ -140,7 +140,7 @@ const listEmployeePosition = () => {
     );
   });
 };
-const resolveOfficer = uuid => {
+const resolveOfficer = params => {
   return new Promise((resolve, reject) => {
     mysqlPool.query(
       "SELECT moen_officer.citizenId, moen_officer.en_prefix, moen_officer.en_firstname, moen_officer.en_lastname, " +
@@ -155,7 +155,7 @@ const resolveOfficer = uuid => {
         "JOIN moen_department ON moen_department.deptUUID = moen_workgroup.departmentUUID " +
         "JOIN moen_section ON moen_section.sectionId = moen_department.sectionID " +
         "WHERE moen_officer.AD_UUID = ?",
-      [uuid],
+      [params["uuid"]],
       (err, results, fields) => {
         if (err) {
           reject(err);

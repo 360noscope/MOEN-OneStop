@@ -9,7 +9,7 @@ $(document).on("submit", "#signinForm", e => {
     authPassword: password
   })
     .done(data => {
-      if (data.authSuccess == true) {
+      if (data.loginStatus == true) {
         window.location.replace("/home");
       } else {
         $(".login-failed-alert").show();

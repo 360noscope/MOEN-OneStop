@@ -1,5 +1,8 @@
-module.exports = (app, operator, checkAPIAuth) => {
-  app.post("/apiAuthen", checkAPIAuth, (req, res) => {
+module.exports = (app) => {
+  const sessionChecker = require("./CheckSession");
+  const operator = require("./OpsHub");
+
+  app.post("/apiAuthen", sessionChecker.checkAPIAuth, (req, res) => {
     operator.apiLogin(req.body.keyName, req.body.keyPassword, result => {
       if (result != false) {
         req.session.apiAuth = true;
@@ -18,7 +21,7 @@ module.exports = (app, operator, checkAPIAuth) => {
       res.send({ message: "Not allowed any guest!", APIResult: false });
     }
   });
-  app.post("/ldapLogin", checkAPIAuth, (req, res) => {
+  app.post("/ldapLogin", sessionChecker.checkAPIAuth, (req, res) => {
     operator.ldapLogin(req.body.username, req.body.password, result => {
       if (result) {
         res.send({ userData: result, APIResult: true });
@@ -30,7 +33,7 @@ module.exports = (app, operator, checkAPIAuth) => {
       }
     });
   });
-  app.get("/getUserlist", checkAPIAuth, (req, res) => {
+  app.get("/getUserlist", sessionChecker.checkAPIAuth, (req, res) => {
     operator.listUser(result => {
       if (result != false) {
         res.send({ userData: result, APIResult: true });
@@ -39,7 +42,7 @@ module.exports = (app, operator, checkAPIAuth) => {
       }
     });
   });
-  app.get("/getOUlist", checkAPIAuth, (req, res) => {
+  app.get("/getOUlist", sessionChecker.checkAPIAuth, (req, res) => {
     operator.listOU(result => {
       if (result != false) {
         res.send({ userData: result, APIResult: true });
@@ -48,7 +51,7 @@ module.exports = (app, operator, checkAPIAuth) => {
       }
     });
   });
-  app.get("/getGroupList", checkAPIAuth, (req, res) => {
+  app.get("/getGroupList", sessionChecker.checkAPIAuth, (req, res) => {
     operator.listGroup(result => {
       if (result != false) {
         res.send({ userData: result, APIResult: true });
@@ -57,7 +60,7 @@ module.exports = (app, operator, checkAPIAuth) => {
       }
     });
   });
-  app.get("/searchUser", checkAPIAuth, (req, res) => {
+  app.get("/searchUser", sessionChecker.checkAPIAuth, (req, res) => {
     const paramList = req.body;
     let conditions = {};
     if (paramList.hasOwnProperty("ou")) {
@@ -77,7 +80,7 @@ module.exports = (app, operator, checkAPIAuth) => {
       }
     });
   });
-  app.post("/addUser", checkAPIAuth, (req, res) => {
+  app.post("/addUser", sessionChecker.checkAPIAuth, (req, res) => {
     const newUser = {
       firstname: req.body.adFirstname,
       lastname: req.body.adLastname,

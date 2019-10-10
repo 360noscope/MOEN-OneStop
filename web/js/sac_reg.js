@@ -678,5 +678,4 @@ $(document).on("change", "select[name=section]", sectionChangeEvent);
 $(document).on("change", "select[name=department]", departmentChangeEvent);
 $(document).on("change", "select[name=emptype]", emptypeChangeEvent);
 $(document).on("shown.bs.modal", "#idUpdateModal", showUpdateModalEvent);
-
 $(document).on("submit", "form[id=identityUpdateForm]", e => {});
