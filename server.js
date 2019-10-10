@@ -36,6 +36,8 @@ app.use("/greedy", express.static("web/vendor"));
 app.use("/josh", express.static("web/js"));
 app.use("/cosh", express.static("web/css"));
 app.use("/imagine", express.static("web/img"));
+app.use("/adminlte", express.static("node_modules/admin-lte/dist"));
+app.use("/adminlte_component", express.static("node_modules/admin-lte/bower_components"));
 
 /**
  * Description. checkAuth middleware function for check authentication on every request

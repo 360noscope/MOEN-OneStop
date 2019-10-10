@@ -65,31 +65,16 @@ module.exports = settingEnv => {
   };
 
   //Officer Page section
-  const Officer = require("./Officer")(mysqlPool);
-  const listOfficer = done => {
-    Officer.listOfficer(done);
-  };
-  const listSection = done => {
-    Officer.listSection(done);
-  };
-  const listDept = (sect, done) => {
-    Officer.listDept(sect, done);
-  };
-  const listWorkgroup = (dept, done) => {
-    Officer.listWorkgroup(dept, done);
-  };
-  const listEmployeeType = done => {
-    Officer.listEmployeeType(done);
-  };
-  const listEmployeeJob = (emptype, done) => {
-    Officer.listEmployeeJob(emptype, done);
-  };
-  const listEmployeeLevel = done => {
-    Officer.listEmployeeLevel(done);
-  };
-  const listEmployeePosition = done => {
-    Officer.listEmployeePosition(done);
-  };
+  const Officer = require("./Officer");
+  const listOfficer = Officer.listOfficer;
+  const listSection = Officer.listSection;
+  const listDept = Officer.listDept;
+  const listWorkgroup = Officer.listWorkgroup;
+  const listEmployeeType = Officer.listEmployeeType;
+  const listEmployeeJob = Officer.listEmployeeJob;
+  const listEmployeeLevel = Officer.listEmployeeLevel;
+  const listEmployeePosition = Officer.listEmployeePosition;
+  const resolveOfficer = Officer.resolveOfficer;
   const insertEmployee = (employee_data, done) => {
     Ldap.resolveWorkgroup(employee_data.workgroup, workgroup => {
       employee_data.workgroup = workgroup;
@@ -116,6 +101,7 @@ module.exports = settingEnv => {
     listEmployeePosition: listEmployeePosition,
     insertEmployee: insertEmployee,
     isUserExists: isUserExists,
+    resolveOfficer: resolveOfficer,
     checkAPIUserRole: checkAPIUserRole,
     listAPIKey: listAPIKey,
     insertAPI: insertAPI,

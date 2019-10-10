@@ -4,10 +4,10 @@
  *
  * To rebuild or modify this file with the latest versions of the included
  * software please visit:
- *   https://datatables.net/download/#bs/pdfmake-0.1.36/dt-1.10.18/b-1.5.6/b-html5-1.5.6/r-2.2.2/rg-1.1.0/sl-1.3.0
+ *   https://datatables.net/download/#bs/dt-1.10.20/b-1.6.0/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1
  *
  * Included libraries:
- *   pdfmake 0.1.36, DataTables 1.10.18, Buttons 1.5.6, HTML5 export 1.5.6, Responsive 2.2.2, RowGroup 1.1.0, Select 1.3.0
+ *   DataTables 1.10.20, Buttons 1.6.0, Responsive 2.2.3, RowGroup 1.1.1, RowReorder 1.2.6, Select 1.3.1
  */
 
 table.dataTable {
@@ -266,11 +266,6 @@ div.dt-button-collection-title:empty {
 ul.dt-button-collection.dropdown-menu {
   display: block;
   z-index: 2002;
-  -webkit-column-gap: 8px;
-  -moz-column-gap: 8px;
-  -ms-column-gap: 8px;
-  -o-column-gap: 8px;
-  column-gap: 8px;
 }
 ul.dt-button-collection.dropdown-menu.fixed {
   position: fixed;
@@ -288,12 +283,21 @@ ul.dt-button-collection.dropdown-menu.fixed.three-column {
 ul.dt-button-collection.dropdown-menu.fixed.four-column {
   margin-left: -300px;
 }
-ul.dt-button-collection.dropdown-menu > * {
+ul.dt-button-collection.dropdown-menu > div:last-child {
+  -webkit-column-gap: 8px;
+  -moz-column-gap: 8px;
+  -ms-column-gap: 8px;
+  -o-column-gap: 8px;
+  column-gap: 8px;
+}
+ul.dt-button-collection.dropdown-menu > div:last-child > * {
   -webkit-column-break-inside: avoid;
   break-inside: avoid;
 }
 ul.dt-button-collection.dropdown-menu.two-column {
   width: 300px;
+}
+ul.dt-button-collection.dropdown-menu.two-column > div:last-child {
   padding-bottom: 1px;
   -webkit-column-count: 2;
   -moz-column-count: 2;
@@ -303,6 +307,8 @@ ul.dt-button-collection.dropdown-menu.two-column {
 }
 ul.dt-button-collection.dropdown-menu.three-column {
   width: 450px;
+}
+ul.dt-button-collection.dropdown-menu.three-column > div:last-child {
   padding-bottom: 1px;
   -webkit-column-count: 3;
   -moz-column-count: 3;
@@ -312,6 +318,8 @@ ul.dt-button-collection.dropdown-menu.three-column {
 }
 ul.dt-button-collection.dropdown-menu.four-column {
   width: 600px;
+}
+ul.dt-button-collection.dropdown-menu.four-column > div:last-child {
   padding-bottom: 1px;
   -webkit-column-count: 4;
   -moz-column-count: 4;
@@ -573,6 +581,30 @@ table.dataTable tr.dtrg-group.dtrg-level-2 td {
 
 table.dataTable tr.dtrg-group.dtrg-level-2 td {
   background-color: #f3f3f3;
+}
+
+
+table.dt-rowReorder-float {
+  position: absolute !important;
+  opacity: 0.8;
+  table-layout: fixed;
+  outline: 2px solid #337ab7;
+  outline-offset: -2px;
+  z-index: 2001;
+}
+
+tr.dt-rowReorder-moving {
+  outline: 2px solid #888;
+  outline-offset: -2px;
+}
+
+body.dt-rowReorder-noOverflow {
+  overflow-x: hidden;
+}
+
+table.dataTable td.reorder {
+  text-align: center;
+  cursor: move;
 }
 
 

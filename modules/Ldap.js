@@ -450,8 +450,8 @@ module.exports = (settingEnv, mysqlPool) => {
                                     mysqlPool.query(
                                       "INSERT INTO moen_officer (citizenId, AD_UUID, en_prefix, en_firstname, en_lastname, th_prefix, " +
                                         "th_firstname, th_lastname, workgroupUUID, eMail, empTypeiD, PositioniD, LeveliD, Mobile, Tel, Birthday, " +
-                                        "photoRaw, addHouseNo, addVillageNo, addTambol, addAmphur, addProvince) " +
-                                        "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                        "photoRaw, addHouseNo, addVillageNo, addTambol, addAmphur, addProvince, sex) " +
+                                        "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                       [
                                         userData.Id,
                                         user_search_result.UUID,
@@ -474,7 +474,8 @@ module.exports = (settingEnv, mysqlPool) => {
                                         userData.Village_no,
                                         userData.Tumbol,
                                         userData.Ampur,
-                                        userData.Province
+                                        userData.Province,
+                                        userData.Sex
                                       ],
                                       err => {
                                         if (err) {
