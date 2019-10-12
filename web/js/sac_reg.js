@@ -51,7 +51,6 @@ $(document).ready(() => {
       wsCheck();
     };
   };
-
   setInterval(startConnection(), 5000);
 
   userTable = $("#userTable").DataTable({
@@ -131,52 +130,8 @@ $(document).on("hidden.bs.modal", "#idInsertModal", e => {
   $("#identPic").attr("src", "");
 });
 
-$(document).on("submit", "#identityForm", e => {
-  e.preventDefault();
-  personData.section = $("#identityForm #section option:selected").val();
-  personData.department = $("#identityForm #department option:selected").val();
-  personData.workgroup = $("#identityForm #workgroup option:selected").val();
-  personData.employee_type = $("#identityForm #emptype option:selected").val();
-  personData.employee_job = $("#identityForm #empjob option:selected").val();
-  personData.employee_level = $(
-    "#identityForm #emplevel option:selected"
-  ).val();
-  personData.employee_position = $(
-    "#identityForm #emppos option:selected"
-  ).val();
-  personData.employee_mobile = $("#identityForm #userMobile").val();
-  personData.employee_tel = $("#identityForm #userTel").val();
-  const enabled_system = {
-    emailSys: $("#identityForm #emailsys").is(":checked") & 1,
-    eleaveSys: $("#identityForm #leavesys").is(":checked") & 1,
-    edocPRSys: $("#identityForm #eDocPRsys").is(":checked") & 1,
-    ekeepSys: $("#identityForm #eDocKeepsys").is(":checked") & 1,
-    ecirSys: $("#identityForm #eDocCirsys").is(":checked") & 1,
-    sarabunSys: $("#identityForm #esarabunsys").is(":checked") & 1,
-    eMeetSys: $("#identityForm #eMeetsys").is(":checked") & 1,
-    vpnSys: $("#identityForm #vpnsys").is(":checked") & 1,
-    carSys: $("#identityForm #carsys").is(":checked") & 1
-  };
-  personData.selected_system = enabled_system;
-  if (personData != null) {
-    $.post(
-      "https://172.19.0.250/addEmployee",
-      { employeeData: personData },
-      (data, status) => {
-        $("#idInsertModal").modal("hide");
-        userTable.ajax.reload();
-      }
-    );
-  } else {
-  }
-});
-
 let selectedUser,
   selectedOption = {};
-$("#userTable tbody").on("click", "tr", function() {
-  selectedUser = userTable.row(this).data();
-  $("#idUpdateModal").modal("show");
-});
 
 const listSection = selected_form => {
   return new Promise((resolve, reject) => {
@@ -669,6 +624,47 @@ const showInsertModalEvent = e => {
     });
 };
 
+const insertFormSubmit = e => {
+  e.preventDefault();
+  personData.section = $("#identityForm #section option:selected").val();
+  personData.department = $("#identityForm #department option:selected").val();
+  personData.workgroup = $("#identityForm #workgroup option:selected").val();
+  personData.employee_type = $("#identityForm #emptype option:selected").val();
+  personData.employee_job = $("#identityForm #empjob option:selected").val();
+  personData.employee_level = $(
+    "#identityForm #emplevel option:selected"
+  ).val();
+  personData.employee_position = $(
+    "#identityForm #emppos option:selected"
+  ).val();
+  personData.employee_mobile = $("#identityForm #userMobile").val();
+  personData.employee_tel = $("#identityForm #userTel").val();
+  const enabled_system = {
+    emailSys: $("#identityForm #emailsys").is(":checked") & 1,
+    eleaveSys: $("#identityForm #leavesys").is(":checked") & 1,
+    edocPRSys: $("#identityForm #eDocPRsys").is(":checked") & 1,
+    ekeepSys: $("#identityForm #eDocKeepsys").is(":checked") & 1,
+    ecirSys: $("#identityForm #eDocCirsys").is(":checked") & 1,
+    sarabunSys: $("#identityForm #esarabunsys").is(":checked") & 1,
+    eMeetSys: $("#identityForm #eMeetsys").is(":checked") & 1,
+    vpnSys: $("#identityForm #vpnsys").is(":checked") & 1,
+    carSys: $("#identityForm #carsys").is(":checked") & 1
+  };
+  personData.selected_system = enabled_system;
+  if (personData != null) {
+    $.post(
+      "https://172.19.0.250/addEmployee",
+      { employeeData: personData },
+      (data, status) => {
+        $("#idInsertModal").modal("hide");
+        userTable.ajax.reload();
+      }
+    );
+  } else {
+    alert("กรุณาใส่ข้อมูลเจ้าหน้าที่");
+  }
+};
+
 $(document).on("shown.bs.modal", "#idInsertModal", showInsertModalEvent);
 $(document).on("click", "#readCard", e => {
   e.preventDefault();
@@ -678,4 +674,9 @@ $(document).on("change", "select[name=section]", sectionChangeEvent);
 $(document).on("change", "select[name=department]", departmentChangeEvent);
 $(document).on("change", "select[name=emptype]", emptypeChangeEvent);
 $(document).on("shown.bs.modal", "#idUpdateModal", showUpdateModalEvent);
+$(document).on("click", "#selectOfficer", function() {
+  selectedUser = userTable.row($(this).parents("tr")).data();
+  $("#idUpdateModal").modal("show");
+});
+$(document).on("submit", "#identityForm", insertFormSubmit);
 $(document).on("submit", "form[id=identityUpdateForm]", e => {});

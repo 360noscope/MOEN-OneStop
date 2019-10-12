@@ -143,8 +143,6 @@
         </nav>
       </header>
       <!-- /.navbar -->
-
-      <!-- Main Sidebar Container -->
       <aside class="main-sidebar">
         <section class="sidebar">
           <div class="user-panel">
@@ -160,46 +158,35 @@
               <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
             </div>
           </div>
-          <!-- Sidebar Menu -->
           <ul class="sidebar-menu" data-widget="tree">
-            <li class="header">จัดการข้อมูล</li>
-            <li class="active">
-              <a href="/home">
-                <i class="fas fa-tachometer-alt"></i>
+            {{#menu}}
+            <li class="{{ liClass }}">{{ liText }}</li>
+            {{/menu}}
+            {{#menu1}}
+            <li class="{{ liClass }}">
+              <a href="{{ aLink }}">
+                <i class="{{ liIcon }}"></i>
                 <span>
-                  แผงควบคุม
+                  {{ liText }}
                 </span>
               </a>
             </li>
-            <li>
-              <a href="/sac_reg">
-                <i class="fas fa-user-lock"></i>
+            {{/menu1}}
+            {{#menu2}}
+            <li class="{{ liClass }}">{{ liText }}</li>
+            {{/menu2}}
+            {{#menu3}}
+            <li class="{{ liClass }}">
+              <a href="{{ aLink }}">
+                <i class="{{ liIcon }}"></i>
                 <span>
-                  Service Access Control
+                  {{ liText }}
                 </span>
               </a>
             </li>
-            <li>
-              <a href="/home">
-                <i class="far fa-life-ring"></i>
-                <span>
-                  ระบบแจ้งซ่อม
-                </span>
-              </a>
-            </li>
-            <li class="header">จัดการ API</li>
-            <li>
-              <a href="/manage_api">
-                <i class="fas fa-key"></i>
-                <span>
-                  จัดการ API Access Key
-                </span>
-              </a>
-            </li>
+            {{/menu3}}
           </ul>
-          <!-- /.sidebar-menu -->
         </section>
-        <!-- /.sidebar -->
       </aside>
 
       <!-- Content Wrapper. Contains page content -->
@@ -290,14 +277,7 @@
         >
         All rights reserved.
       </footer>
-
-      <!-- Control Sidebar -->
-      <aside class="control-sidebar control-sidebar-dark">
-        <!-- Control sidebar content goes here -->
-      </aside>
-      <!-- /.control-sidebar -->
     </div>
-    <!-- ./wrapper -->
 
     <script type="text/javascript" src="/josh/jquery.js"></script>
     <script

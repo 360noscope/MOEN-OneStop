@@ -31,13 +31,11 @@
   <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
       <header class="main-header">
-        <!-- Logo -->
         <a href="#" class="logo">
           <span class="logo-mini">ITO</span>
           <!-- logo for regular state and mobile devices -->
           <span class="logo-lg"><b>MOEN</b> ICT OneStop™</span>
         </a>
-        <!-- Header Navbar: style can be found in header.less -->
         <nav class="navbar navbar-static-top">
           <!-- Sidebar toggle button-->
           <a
@@ -146,9 +144,7 @@
           </div>
         </nav>
       </header>
-      <!-- /.navbar -->
-
-      <!-- Main Sidebar Container -->
+     
       <aside class="main-sidebar">
         <section class="sidebar">
           <div class="user-panel">
@@ -164,49 +160,37 @@
               <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
             </div>
           </div>
-          <!-- Sidebar Menu -->
           <ul class="sidebar-menu" data-widget="tree">
-            <li class="header">จัดการข้อมูล</li>
-            <li>
-              <a href="/home">
-                <i class="fas fa-tachometer-alt"></i>
+            {{#menu}}
+            <li class="{{ liClass }}">{{ liText }}</li>
+            {{/menu}}
+            {{#menu1}}
+            <li class="{{ liClass }}">
+              <a href="{{ aLink }}">
+                <i class="{{ liIcon }}"></i>
                 <span>
-                  แผงควบคุม
+                  {{ liText }}
                 </span>
               </a>
             </li>
-            <li class="active">
-              <a href="/sac_reg">
-                <i class="fas fa-user-lock"></i>
+            {{/menu1}}
+            {{#menu2}}
+            <li class="{{ liClass }}">{{ liText }}</li>
+            {{/menu2}}
+            {{#menu3}}
+            <li class="{{ liClass }}">
+              <a href="{{ aLink }}">
+                <i class="{{ liIcon }}"></i>
                 <span>
-                  Service Access Control
+                  {{ liText }}
                 </span>
               </a>
             </li>
-            <li>
-              <a href="/home">
-                <i class="far fa-life-ring"></i>
-                <span>
-                  ระบบแจ้งซ่อม
-                </span>
-              </a>
-            </li>
-            <li class="header">จัดการ API</li>
-            <li>
-              <a href="/manage_api">
-                <i class="fas fa-key"></i>
-                <span>
-                  จัดการ API Access Key
-                </span>
-              </a>
-            </li>
+            {{/menu3}}
           </ul>
-          <!-- /.sidebar-menu -->
         </section>
-        <!-- /.sidebar -->
       </aside>
 
-      <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <div class="content-header">
@@ -277,7 +261,6 @@
         <section class="content"></section>
         <!-- /.content -->
       </div>
-      <!-- /.content-wrapper -->
       <footer class="main-footer">
         <strong
           >Copyright &copy; 2019
@@ -316,103 +299,65 @@
                   <h4>ข้อมูลบัตรประชาชน</h4>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-3">
-                        <label for="identityID" class="control-label"
-                          >เลขบัตรประชาชน</label
-                        >
-                      </div>
-                      <div class="col-md-7">
-                        <input class="form-control" id="identityID" disabled />
-                      </div>
-                      <div class="col-md-2">
-                        <button
-                          class="btn btn-primary pull-left"
-                          id="readCard"
-                          type="button"
-                        >
-                          อ่านบัตร
-                        </button>
-                      </div>
+              <div class="row col-md-12">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label for="identityID" class="control-label"
+                        >เลขบัตรประชาชน</label
+                      >
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" name="identityID" disabled />
+                    </div>
+                    <div class="col-md-6">
+                      <button
+                        class="btn btn-primary pull-right"
+                        id="readCard"
+                        type="button"
+                      >
+                        อ่านบัตร
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-3">
-                        <label for="thaiName" class="control-label"
-                          >ชื่อ-นามสกุล ไทย</label
-                        >
-                      </div>
-                      <div class="col-md-9">
-                        <input class="form-control" id="thaiName" disabled />
-                      </div>
+              <div class="row col-md-12">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-2">
+                      <label for="thaiName" class="control-label"
+                        >ชื่อ-นามสกุล ไทย</label
+                      >
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" name="thaiName" disabled />
+                    </div>
+                    <div class="col-md-2">
+                      <label for="engName" class="control-label"
+                        >ชื่อ-นามสกุล ภาษาอังกฤษ</label
+                      >
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" name="engName" disabled />
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-4">
-                        <label for="engName" class="control-label"
-                          >ชื่อ-นามสกุล ภาษาอังกฤษ</label
-                        >
-                      </div>
-                      <div class="col-md-8">
-                        <input class="form-control" id="engName" disabled />
-                      </div>
+              <div class="row col-md-12">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-1">
+                      <label class="control-label">เพศ</label>
                     </div>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-1">
-                        <label class="control-label">เพศ</label>
-                      </div>
-                      <div class="col-md-4">
-                        <input class="form-control" id="sex" disabled />
-                      </div>
-                      <div class="col-md-2">
-                        <label class="control-label">วันเกิด</label>
-                      </div>
-                      <div class="col-md-5">
-                        <input class="form-control" id="birthDate" disabled />
-                      </div>
+                    <div class="col-md-4">
+                      <input class="form-control" name="sex" disabled />
                     </div>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-md-2">
-                        <label for="issueDate" class="control-label"
-                          >วันออกบัตร</label
-                        >
-                      </div>
-                      <div class="col-md-3">
-                        <input class="form-control" id="issueDate" disabled />
-                      </div>
-                      <div class="col-md-2">
-                        <label for="expiredDate" class="control-label"
-                          >บัตรหมดอายุ</label
-                        >
-                      </div>
-                      <div class="col-md-4">
-                        <input class="form-control" id="expiredDate" disabled />
-                      </div>
+                    <div class="col-md-1">
+                      <label class="control-label">วันเกิด</label>
+                    </div>
+                    <div class="col-md-6">
+                      <input class="form-control" name="birthDate" disabled />
                     </div>
                   </div>
                 </div>

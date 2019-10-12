@@ -1,4 +1,4 @@
-module.exports = (app) => {
+module.exports = app => {
   const sessionChecker = require("./CheckSession");
   const operator = require("./OpsHub");
 
@@ -34,22 +34,24 @@ module.exports = (app) => {
     });
   });
   app.get("/getUserlist", sessionChecker.checkAPIAuth, (req, res) => {
-    operator.listUser(result => {
-      if (result != false) {
-        res.send({ userData: result, APIResult: true });
-      } else {
-        res.send({ message: "Not found any record", APIResult: false });
-      }
-    });
+    operator
+      .listUser()
+      .then(search_result => {
+        res.send(search_result);
+      })
+      .catch(err => {
+        res.send({ api_error: err });
+      });
   });
   app.get("/getOUlist", sessionChecker.checkAPIAuth, (req, res) => {
-    operator.listOU(result => {
-      if (result != false) {
-        res.send({ userData: result, APIResult: true });
-      } else {
-        res.send({ message: "Not found any record", APIResult: false });
-      }
-    });
+    operator
+      .listOU()
+      .then(search_result => {
+        res.send(search_result);
+      })
+      .catch(err => {
+        res.send({ api_error: err });
+      });
   });
   app.get("/getGroupList", sessionChecker.checkAPIAuth, (req, res) => {
     operator.listGroup(result => {

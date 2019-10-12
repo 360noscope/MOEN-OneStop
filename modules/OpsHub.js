@@ -29,26 +29,15 @@ const apiLogin = (username, password, done) => {
     }
   });
 };
-const ldapLogin = (username, password, done) => {
-  Auth.ldapLogin(username, password, done);
-};
 
 //LDAP section
 const Ldap = require("./Ldap");
-const listUser = done => {
-  Ldap.listUser(done);
-};
-const listOU = done => {
-  Ldap.listOU(done);
-};
-const listGroup = done => {
-  Ldap.listGroup(done);
-};
+const listUser = Ldap.listUser;
+const listOU = Ldap.listOU;
+const listGroup = Ldap.listGroup;
+const ldapLogin = Ldap.ldapLogin;
 const searchUser = (conditions, done) => {
   Ldap.searchUser(conditions, done);
-};
-const addUser = (userData, done) => {
-  Ldap.addUser(userData, done);
 };
 
 //Officer Page section
@@ -62,20 +51,7 @@ const listEmployeeJob = Officer.listEmployeeJob;
 const listEmployeeLevel = Officer.listEmployeeLevel;
 const listEmployeePosition = Officer.listEmployeePosition;
 const resolveOfficer = Officer.resolveOfficer;
-const insertEmployee = (employee_data, done) => {
-  Ldap.resolveWorkgroup(employee_data.workgroup, workgroup => {
-    employee_data.workgroup = workgroup;
-    Ldap.resolveOU(employee_data.department, OU => {
-      employee_data.department = OU;
-      employee_data.password =
-        employee_data.Eng_firstname.substring(0, 1).toUpperCase() +
-        employee_data.Eng_lastname.substring(0, 1).toLowerCase() +
-        "@" +
-        employee_data.Id.substring(8, 13);
-      Ldap.addUser(employee_data, done);
-    });
-  });
-};
+const insertEmployee = Ldap.insertUser;
 
 module.exports = {
   listOfficer: listOfficer,
@@ -98,6 +74,5 @@ module.exports = {
   listUser: listUser,
   listOU: listOU,
   listGroup: listGroup,
-  searchUser: searchUser,
-  addUser: addUser
+  searchUser: searchUser
 };

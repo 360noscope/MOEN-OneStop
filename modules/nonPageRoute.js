@@ -156,9 +156,14 @@ module.exports = app => {
   app.get("/listEmployeeLevel", sessionChecker.checkAuth, handleFormRequest);
   app.get("/listEmployeePosition", sessionChecker.checkAuth, handleFormRequest);
   app.post("/addEmployee", sessionChecker.checkAuth, (req, res) => {
-    operator.insertEmployee(req.body.employeeData, aResult => {
-      res.send(aResult);
-    });
+    operator
+      .insertEmployee(req.body.employeeData)
+      .then(() => {
+        res.send({ actionResult: true });
+      })
+      .catch(err => {
+        res.send({ actionResult: false, error: err });
+      });
   });
   app.post("/resolveEmployee", sessionChecker.checkAuth, handleFormRequest);
 

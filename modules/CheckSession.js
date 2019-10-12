@@ -1,12 +1,4 @@
 const checkAuth = (req, res, next) => {
-  const pageList = {
-    "/home_admin": process.env.ADMIN_HOMEPAGE,
-    "/_admin": process.env.ADMIN_HOMEPAGE,
-    "/sac_reg_admin": process.env.ADMIN_SAC_REG,
-    "/manage_api_admin": process.env.ADMIN_API_MANAGE,
-    "/_user": "",
-    "/home_user": ""
-  };
   const tableRequest = [
     "/listOfficer",
     "/apiexists",
@@ -22,12 +14,12 @@ const checkAuth = (req, res, next) => {
     } else {
       if (userObject.isAdmin == true) {
         if (!tableRequest.includes(way)) {
-          req.page = pageList[way + "_admin"];
+          req.page = "admin";
         }
         next();
       } else {
         if (!tableRequest.includes(way)) {
-          req.page = pageList[way + "_user"];
+          req.page = "user";
         }
         next();
       }
