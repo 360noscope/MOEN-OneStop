@@ -3,16 +3,36 @@ module.exports = app => {
   const operator = require("./OpsHub");
 
   app.post("/apiAuthen", sessionChecker.checkAPIAuth, (req, res) => {
-    operator.apiLogin(req.body.keyName, req.body.keyPassword, result => {
-      if (result != false) {
-        req.session.apiAuth = true;
-        req.session.apiAuthData = result;
+    let loginResult;
+    operator
+      .apiLogin(req.body.keyName, req.body.keyPassword)
+      .then(authen_result => {
+        if (authen_result != false) {
+          loginResult = {
+            message: "API login successful!",
+            APIloginResult: true
+          };
+        } else {
+          loginResult = {
+            message: "Wrong username or password",
+            APIloginResult: false
+          };
+        }
+        return operator.checkAPIUserRole(authen_result);
+      })
+      .then(perm_list => {
+        if (loginResult.APIloginResult == true) {
+          req.session.apiAuth = loginResult;
+          req.session.apipermList = perm_list;
+        }
+        res.send(loginResult);
+      })
+      .catch(err => {
         res.send({
-          message: "API login successful!",
-          APIloginResult: true
+          message: "API Error!",
+          APIloginResult: err
         });
-      }
-    });
+      });
   });
   app.post("/getKeynumber", (req, res) => {
     if (req.session.apiAuth == true) {
@@ -35,7 +55,7 @@ module.exports = app => {
   });
   app.get("/getUserlist", sessionChecker.checkAPIAuth, (req, res) => {
     operator
-      .listUser()
+      .getUserList()
       .then(search_result => {
         res.send(search_result);
       })

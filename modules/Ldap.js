@@ -9,15 +9,19 @@ const ldapClient = ldap.createClient({
   tlsOptions: { rejectUnauthorized: false }
 });
 
-const bindClient = (username, password) => {
+const bindClient = () => {
   return new Promise((resolve, reject) => {
-    ldapClient.bind(`${username}@energy.local`, password, err => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
+    ldapClient.bind(
+      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
+      settingEnv.AD_API_PASSWORD,
+      err => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
       }
-    });
+    );
   });
 };
 
@@ -183,7 +187,6 @@ const resolveWorkgroup = uuid => {
       });
   });
 };
-//end sub method section
 
 const searchUser = (conditions, done) => {
   let dnString = "dc=energy,dc=local";
@@ -455,10 +458,7 @@ const insertUser = userData => {
       objectClass: ["top", "person", "organizationalPerson", "user"]
     };
     let workgroup, department, userDN;
-    bindClient(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD
-    )
+    bindClient()
       .then(() => {
         return resolveWorkgroup(userData.workgroup);
       })
@@ -503,14 +503,12 @@ const insertUser = userData => {
       });
   });
 };
+//end sub method section
 
 const getUserList = () => {
   return new Promise((resolve, reject) => {
     let result;
-    bindClient(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD
-    )
+    bindClient()
       .then(() => {
         return listUser();
       })
@@ -530,10 +528,7 @@ const getUserList = () => {
 const getGroupList = () => {
   return new Promise((resolve, reject) => {
     let result;
-    bindClient(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD
-    )
+    bindClient()
       .then(() => {
         return listGroup();
       })
@@ -574,7 +569,7 @@ const getOUList = () => {
 };
 
 module.exports = {
-  listUser: getUserList,
+  getUserList: getUserList,
   listOU: getOUList,
   insertUser: insertUser,
   listGroup: getGroupList,
