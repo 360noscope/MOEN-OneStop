@@ -493,9 +493,7 @@ const insertUser = userData => {
         return clientDatabaseUpdate(userData);
       })
       .then(() => {
-        return unbindClient();
-      })
-      .then(() => {
+        ldapClient.unbind();
         resolve();
       })
       .catch(err => {
@@ -507,17 +505,13 @@ const insertUser = userData => {
 
 const getUserList = () => {
   return new Promise((resolve, reject) => {
-    let result;
     bindClient()
       .then(() => {
         return listUser();
       })
       .then(search_result => {
-        result = search_result;
-        return unbindClient();
-      })
-      .then(() => {
-        resolve(result);
+        ldapClient.unbind();
+        resolve(search_result);
       })
       .catch(err => {
         reject(err);
@@ -527,17 +521,13 @@ const getUserList = () => {
 
 const getGroupList = () => {
   return new Promise((resolve, reject) => {
-    let result;
     bindClient()
       .then(() => {
         return listGroup();
       })
       .then(search_result => {
-        result = search_result;
-        return unbindClient();
-      })
-      .then(() => {
-        resolve(result);
+        ldapClient.unbind();
+        resolve(search_result);
       })
       .catch(err => {
         reject(err);
@@ -547,20 +537,13 @@ const getGroupList = () => {
 
 const getOUList = () => {
   return new Promise((resolve, reject) => {
-    let result;
-    bindClient(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD
-    )
+    bindClient()
       .then(() => {
         return listOU();
       })
       .then(search_result => {
-        result = search_result;
-        return unbindClient();
-      })
-      .then(() => {
-        resolve(result);
+        ldapClient.unbind();
+        resolve(search_result);
       })
       .catch(err => {
         reject(err);
@@ -570,9 +553,9 @@ const getOUList = () => {
 
 module.exports = {
   getUserList: getUserList,
-  listOU: getOUList,
+  getOUList: getOUList,
   insertUser: insertUser,
-  listGroup: getGroupList,
+  getGroupList: getGroupList,
   searchUser: searchUser,
   searchUserUUID: searchUserUUID,
   searchGroupUUID: searchGroupUUID,

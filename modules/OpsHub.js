@@ -19,9 +19,9 @@ const apiLogin = Auth.apiLogin;
 //LDAP section
 const Ldap = require("./Ldap");
 const getUserList = Ldap.getUserList;
-const listOU = Ldap.listOU;
-const listGroup = Ldap.listGroup;
-const ldapLogin = Ldap.ldapLogin;
+const getOUList = Ldap.getOUList;
+const getGroupList = Ldap.getGroupList;
+const ldapLogin = Auth.ldapLogin;
 const searchUser = (conditions, done) => {
   Ldap.searchUser(conditions, done);
 };
@@ -40,6 +40,12 @@ const resolveOfficer = Officer.resolveOfficer;
 const insertEmployee = Ldap.insertUser;
 
 module.exports = {
+  //LDAP API def
+  getUserList: getUserList,
+  getGroupList: getGroupList,
+  getOUList: getOUList,
+  ldapLogin: ldapLogin,
+
   listOfficer: listOfficer,
   listSection: listSection,
   listDept: listDept,
@@ -56,9 +62,5 @@ module.exports = {
   insertAPI: insertAPI,
   webLogin: webLogin,
   apiLogin: apiLogin,
-  ldapLogin: ldapLogin,
-  getUserList: getUserList,
-  listOU: listOU,
-  listGroup: listGroup,
   searchUser: searchUser
 };

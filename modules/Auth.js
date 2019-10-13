@@ -82,6 +82,7 @@ const webLogin = (username, password) => {
         return ldapSearch(username);
       })
       .then(user => {
+        ldapClient.unbind();
         resolve(user);
       })
       .catch(err => {
@@ -114,19 +115,20 @@ const apiLogin = (username, password) => {
   });
 };
 
-const searchCitizen = (uuid, done) => {
-  mysqlPool.query(
-    "SELECT citizenId FROM moen_officer WHERE AD_UUID = ?",
-    [uuid],
-    (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        done(false);
-      } else {
-        done(results[0]["citizenId"]);
+const searchCitizen = uuid => {
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      "SELECT citizenId FROM moen_officer WHERE AD_UUID = ?",
+      [uuid],
+      (err, results, fields) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results[0]["citizenId"]);
+        }
       }
-    }
-  );
+    );
+  });
 };
 
 const ldapLogin = (username, password) => {
@@ -163,20 +165,23 @@ const ldapLogin = (username, password) => {
                     groupList.push(item.split(",")[0].split("=")[1]);
                   });
                 }
-                searchCitizen(converter.GUIDtoUUID(user.objectGUID), result => {
-                  const adminRight =
-                    groupList.includes("Administrators") ||
-                    groupList.includes("Domain Admins");
-                  const userObject = {
-                    UUID: converter.GUIDtoUUID(user.objectGUID),
-                    citizenId: result,
-                    OU: ouInfo,
-                    firstname: user.givenName,
-                    lastname: user.sn,
-                    isAdmin: adminRight
-                  };
-                  resolve(userObject);
-                });
+                searchCitizen(converter.GUIDtoUUID(user.objectGUID)).then(
+                  (search_result) => {
+                    const adminRight =
+                      groupList.includes("Administrators") ||
+                      groupList.includes("Domain Admins");
+                    const userObject = {
+                      UUID: converter.GUIDtoUUID(user.objectGUID),
+                      citizenId: search_result,
+                      OU: ouInfo,
+                      firstname: user.givenName,
+                      lastname: user.sn,
+                      isAdmin: adminRight
+                    };
+                    ldapClient.unbind();
+                    resolve(userObject);
+                  }
+                );
               });
             }
           }

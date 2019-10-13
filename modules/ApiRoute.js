@@ -42,16 +42,24 @@ module.exports = app => {
     }
   });
   app.post("/ldapLogin", sessionChecker.checkAPIAuth, (req, res) => {
-    operator.ldapLogin(req.body.username, req.body.password, result => {
-      if (result) {
-        res.send({ userData: result, APIResult: true });
-      } else {
+    operator
+      .ldapLogin(req.body.username, req.body.password)
+      .then(ldap_result => {
+        if (!ldap_result) {
+          res.send({ loginStatus: true, userInfo: ldap_result });
+        } else {
+          res.send({
+            loginStatus: false,
+            message: "Wrong username or password"
+          });
+        }
+      })
+      .catch(err => {
         res.send({
-          message: "AD username or password is incorrect!",
-          APIResult: false
+          message: "API Error!",
+          APIloginResult: err
         });
-      }
-    });
+      });
   });
   app.get("/getUserlist", sessionChecker.checkAPIAuth, (req, res) => {
     operator
@@ -65,7 +73,7 @@ module.exports = app => {
   });
   app.get("/getOUlist", sessionChecker.checkAPIAuth, (req, res) => {
     operator
-      .listOU()
+      .getOUList()
       .then(search_result => {
         res.send(search_result);
       })
@@ -74,13 +82,14 @@ module.exports = app => {
       });
   });
   app.get("/getGroupList", sessionChecker.checkAPIAuth, (req, res) => {
-    operator.listGroup(result => {
-      if (result != false) {
-        res.send({ userData: result, APIResult: true });
-      } else {
-        res.send({ message: "Not found any record", APIResult: false });
-      }
-    });
+    operator
+      .getGroupList()
+      .then(search_result => {
+        res.send(search_result);
+      })
+      .catch(err => {
+        res.send({ api_error: err });
+      });
   });
   app.get("/searchUser", sessionChecker.checkAPIAuth, (req, res) => {
     const paramList = req.body;
