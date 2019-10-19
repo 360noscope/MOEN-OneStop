@@ -1,41 +1,27 @@
 const settingEnv = process.env;
 const mysqlPool = require("./Database");
 //API Page section
-const Api = require("./Api")(mysqlPool);
-const listAPIKey = (userId, done) => {
-  Api.listAPIKey(userId, done);
-};
+const Api = require("./Api");
+const listAPIKey = Api.listAPIKey;
 const insertAPI = (name, password, owner, done) => {
   Api.insertAPI(name, password, owner, done);
 };
 const isUserExists = (username, done) => {
   Api.isUserExists(username, done);
 };
-const checkAPIUserRole = (keyNumber, done) => {
-  Api.checkAPIUserRole(keyNumber, done);
-};
+const checkAPIUserRole = Api.checkAPIRole;
 
 //Authentication section
 const Auth = require("./Auth");
 const webLogin = Auth.webLogin;
-const apiLogin = (username, password, done) => {
-  Auth.apiLogin(username, password, loginResult => {
-    if (loginResult != false) {
-      Api.checkAPIRole(loginResult, permResult => {
-        done({ keyNumber: loginResult, permList: permResult });
-      });
-    } else {
-      done(false);
-    }
-  });
-};
+const apiLogin = Auth.apiLogin;
 
 //LDAP section
 const Ldap = require("./Ldap");
-const listUser = Ldap.listUser;
-const listOU = Ldap.listOU;
-const listGroup = Ldap.listGroup;
-const ldapLogin = Ldap.ldapLogin;
+const getUserList = Ldap.getUserList;
+const getOUList = Ldap.getOUList;
+const getGroupList = Ldap.getGroupList;
+const ldapLogin = Auth.ldapLogin;
 const searchUser = (conditions, done) => {
   Ldap.searchUser(conditions, done);
 };
@@ -55,6 +41,12 @@ const insertEmployee = Ldap.insertUser;
 const listUserContacts = Officer.listUserContacts;
 
 module.exports = {
+  //LDAP API def
+  getUserList: getUserList,
+  getGroupList: getGroupList,
+  getOUList: getOUList,
+  ldapLogin: ldapLogin,
+
   listOfficer: listOfficer,
   listSection: listSection,
   listDept: listDept,
@@ -72,9 +64,5 @@ module.exports = {
   insertAPI: insertAPI,
   webLogin: webLogin,
   apiLogin: apiLogin,
-  ldapLogin: ldapLogin,
-  listUser: listUser,
-  listOU: listOU,
-  listGroup: listGroup,
   searchUser: searchUser
 };

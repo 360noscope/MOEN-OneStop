@@ -3,16 +3,36 @@ module.exports = app => {
   const operator = require("./OpsHub");
 
   app.post("/apiAuthen", sessionChecker.checkAPIAuth, (req, res) => {
-    operator.apiLogin(req.body.keyName, req.body.keyPassword, result => {
-      if (result != false) {
-        req.session.apiAuth = true;
-        req.session.apiAuthData = result;
+    let loginResult;
+    operator
+      .apiLogin(req.body.keyName, req.body.keyPassword)
+      .then(authen_result => {
+        if (authen_result != false) {
+          loginResult = {
+            message: "API login successful!",
+            APIloginResult: true
+          };
+        } else {
+          loginResult = {
+            message: "Wrong username or password",
+            APIloginResult: false
+          };
+        }
+        return operator.checkAPIUserRole(authen_result);
+      })
+      .then(perm_list => {
+        if (loginResult.APIloginResult == true) {
+          req.session.apiAuth = loginResult;
+          req.session.apipermList = perm_list;
+        }
+        res.send(loginResult);
+      })
+      .catch(err => {
         res.send({
-          message: "API login successful!",
-          APIloginResult: true
+          message: "API Error!",
+          APIloginResult: err
         });
-      }
-    });
+      });
   });
   app.post("/getKeynumber", (req, res) => {
     if (req.session.apiAuth == true) {
@@ -22,20 +42,28 @@ module.exports = app => {
     }
   });
   app.post("/ldapLogin", sessionChecker.checkAPIAuth, (req, res) => {
-    operator.ldapLogin(req.body.username, req.body.password, result => {
-      if (result) {
-        res.send({ userData: result, APIResult: true });
-      } else {
+    operator
+      .ldapLogin(req.body.username, req.body.password)
+      .then(ldap_result => {
+        if (!ldap_result) {
+          res.send({ loginStatus: true, userInfo: ldap_result });
+        } else {
+          res.send({
+            loginStatus: false,
+            message: "Wrong username or password"
+          });
+        }
+      })
+      .catch(err => {
         res.send({
-          message: "AD username or password is incorrect!",
-          APIResult: false
+          message: "API Error!",
+          APIloginResult: err
         });
-      }
-    });
+      });
   });
   app.get("/getUserlist", sessionChecker.checkAPIAuth, (req, res) => {
     operator
-      .listUser()
+      .getUserList()
       .then(search_result => {
         res.send(search_result);
       })
@@ -45,7 +73,7 @@ module.exports = app => {
   });
   app.get("/getOUlist", sessionChecker.checkAPIAuth, (req, res) => {
     operator
-      .listOU()
+      .getOUList()
       .then(search_result => {
         res.send(search_result);
       })
@@ -54,13 +82,14 @@ module.exports = app => {
       });
   });
   app.get("/getGroupList", sessionChecker.checkAPIAuth, (req, res) => {
-    operator.listGroup(result => {
-      if (result != false) {
-        res.send({ userData: result, APIResult: true });
-      } else {
-        res.send({ message: "Not found any record", APIResult: false });
-      }
-    });
+    operator
+      .getGroupList()
+      .then(search_result => {
+        res.send(search_result);
+      })
+      .catch(err => {
+        res.send({ api_error: err });
+      });
   });
   app.get("/searchUser", sessionChecker.checkAPIAuth, (req, res) => {
     const paramList = req.body;

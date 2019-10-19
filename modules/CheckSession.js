@@ -51,7 +51,7 @@ const checkAPIAuth = (req, res, next) => {
     }
   } else {
     if (req.session.apiAuth) {
-      const permList = req.session.apiAuthData.permList;
+      const permList = req.session.apipermList;
       if (permList.includes(requestMperm[requestURL])) {
         next();
       } else {

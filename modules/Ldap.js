@@ -9,15 +9,19 @@ const ldapClient = ldap.createClient({
   tlsOptions: { rejectUnauthorized: false }
 });
 
-const bindClient = (username, password) => {
+const bindClient = () => {
   return new Promise((resolve, reject) => {
-    ldapClient.bind(`${username}@energy.local`, password, err => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
+    ldapClient.bind(
+      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
+      settingEnv.AD_API_PASSWORD,
+      err => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
       }
-    });
+    );
   });
 };
 
@@ -171,7 +175,6 @@ const resolveWorkgroup = uuid => {
       });
   });
 };
-//end sub method section
 
 const searchUser = (conditions, done) => {
   let dnString = "dc=energy,dc=local";
@@ -443,10 +446,7 @@ const insertUser = userData => {
       objectClass: ["top", "person", "organizationalPerson", "user"]
     };
     let workgroup, department, userDN;
-    bindClient(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD
-    )
+    bindClient()
       .then(() => {
         return resolveWorkgroup(userData.workgroup);
       })
@@ -486,13 +486,11 @@ const insertUser = userData => {
       });
   });
 };
+//end sub method section
 
 const getUserList = () => {
   return new Promise((resolve, reject) => {
-    bindClient(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD
-    )
+    bindClient()
       .then(() => {
         return listUser();
       })
@@ -509,10 +507,7 @@ const getUserList = () => {
 
 const getGroupList = () => {
   return new Promise((resolve, reject) => {
-    bindClient(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD
-    )
+    bindClient()
       .then(() => {
         return listGroup();
       })
@@ -528,10 +523,7 @@ const getGroupList = () => {
 
 const getOUList = () => {
   return new Promise((resolve, reject) => {
-    bindClient(
-      `${settingEnv.AD_API_ACCOUNT}@energy.local`,
-      settingEnv.AD_API_PASSWORD
-    )
+    bindClient()
       .then(() => {
         return listOU();
       })
@@ -546,10 +538,10 @@ const getOUList = () => {
 };
 
 module.exports = {
-  listUser: getUserList,
-  listOU: getOUList,
+  getUserList: getUserList,
+  getOUList: getOUList,
   insertUser: insertUser,
-  listGroup: getGroupList,
+  getGroupList: getGroupList,
   searchUser: searchUser,
   searchUserUUID: searchUserUUID,
   searchGroupUUID: searchGroupUUID,
