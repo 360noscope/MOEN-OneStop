@@ -10,6 +10,7 @@ $(document).on("submit", "#signinForm", e => {
   })
     .done(data => {
       if (data.loginStatus == true) {
+        localStorage.setItem("chatUUID", data.uuid);
         window.location.replace("/home");
       } else {
         $(".login-failed-alert").show();

@@ -1,32 +1,10 @@
 /**@module nonPageRoute*/
 module.exports = app => {
-  const redis = require("redis");
-  const redisClient = redis.createClient(6379);
   const Promise = require("promise");
   const sessionChecker = require("./CheckSession");
+  const Cacher = require("./Cacher");
   const operator = require("./OpsHub");
 
-  const checkCache = key => {
-    return new Promise((resolve, reject) => {
-      redisClient.get(key, (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          if (data) {
-            resolve(JSON.parse(data));
-          } else {
-            resolve(null);
-          }
-        }
-      });
-    });
-  };
-  const updateCache = (key, data) => {
-    return new Promise((resolve, reject) => {
-      redisClient.setex(key, 3600, JSON.stringify(data));
-      resolve();
-    });
-  };
   const checkMethodArgs = func => {
     const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/gm;
     const ARGUMENT_NAMES = /([^\s,]+)/g;
@@ -89,20 +67,20 @@ module.exports = app => {
       const testReq = req.body;
       redisKey = redisKey + testReq[keyList[req_url]["selective"]];
     }
-    checkCache(redisKey)
+    Cacher.cacheRetreive(redisKey)
       .then(data => {
         if (data) {
           res.send(data);
         } else {
           if (checkMethodArgs(keyList[req_url]["fetchMethod"]).length == 0) {
             keyList[req_url]["fetchMethod"]().then(search_result => {
-              updateCache(redisKey, search_result);
+              Cacher.cacheUpdate(redisKey, search_result);
               res.send(search_result);
             });
           } else {
             const reqParam = req.body;
             keyList[req_url]["fetchMethod"](reqParam).then(search_result => {
-              updateCache(redisKey, search_result);
+              Cacher.cacheUpdate(redisKey, search_result);
               res.send(search_result);
             });
           }
@@ -125,13 +103,17 @@ module.exports = app => {
           picture: user.picture
         };
         req.session.userObject = userObject;
-        res.send({ loginStatus: true });
+        res.send({
+          loginStatus: true,
+          uuid: user.UUID
+        });
       })
       .catch(err => {
         console.error("[System] " + err);
         res.send({ loginStatus: false });
       });
   };
+
 
   app.post("/auth", handleAuthenRequest);
   app.get("/signout", sessionChecker.checkAuth, (req, res) => {
@@ -155,7 +137,7 @@ module.exports = app => {
   app.post("/listEmployeeJob", sessionChecker.checkAuth, handleFormRequest);
   app.get("/listEmployeeLevel", sessionChecker.checkAuth, handleFormRequest);
   app.get("/listEmployeePosition", sessionChecker.checkAuth, handleFormRequest);
-  app.post("/addEmployee", sessionChecker.checkAuth, (req, res) => {
+  app.post("/insertEmployee", sessionChecker.checkAuth, (req, res) => {
     operator
       .insertEmployee(req.body.employeeData)
       .then(() => {
@@ -166,7 +148,14 @@ module.exports = app => {
       });
   });
   app.post("/resolveEmployee", sessionChecker.checkAuth, handleFormRequest);
-
+  app.get("/listUserContacts", sessionChecker.checkAuth, (req, res) => {
+    const userSession = req.session.userObject;
+    operator.listUserContacts(userSession.UUID).then(search_result => {
+      res.send(search_result);
+    });
+  });
+  app.get("/retreiveChatMsg", sessionChecker.checkAuth, acquiredChatMsg);
+  app.post("/updateChatMsg", sessionChecker.checkAuth, updateChatMsg);
   app.post("/listAPIKey", sessionChecker.checkAuth, (req, res) => {
     operator.listAPIKey(req.session.UUID, result => {
       res.send(result);

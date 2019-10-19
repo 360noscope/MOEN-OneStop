@@ -5,6 +5,7 @@ const express = require("express");
 const wsServer = require("ws");
 const bParser = require("body-parser");
 const session = require("express-session");
+const moment = require("moment");
 const dotenv = require("dotenv");
 const app = express();
 const mustacheExpress = require("mustache-express");
@@ -56,13 +57,16 @@ const httpsServer = https.createServer(
 //web socket section!
 const wss = new wsServer.Server({ server: httpsServer });
 
+let connectedClient = {};
 wss.on("connection", (socket, incoming_request) => {
   const connectionId = socket._socket.remoteAddress.replace("::ffff:", "");
   let paramStr = incoming_request.url;
   paramStr = paramStr.replace("/", "");
   paramStr = paramStr.replace("?", "");
-  socket.id = connectionId + "-" + paramStr.split("=")[1];
-  console.log(socket.id + " is connecting in!");
+  const connectionName = connectionId + "-" + paramStr.split("=")[1];
+  connectedClient[connectionName] = socket;
+  socket.id = connectionName;
+  console.log("[LOG] " + connectionName + " is connecting in!");
   socket.on("message", message => {
     const msg = JSON.parse(message);
     switch (msg.Action) {
@@ -70,27 +74,50 @@ wss.on("connection", (socket, incoming_request) => {
         console.log(
           "[LOG] client reading card from " + connectionId + "-agent"
         );
-        wss.clients.forEach(client => {
-          if (client.id == connectionId + "-agent") {
-            client.send(JSON.stringify({ action: "retreivedData", data: "" }));
-          }
-        });
+        const agentClientName = connectionId + "-agent";
+        if (agentClientName in connectedClient) {
+          connectedClient[agentClientName].send(
+            JSON.stringify({ action: "retreivedData", data: "" })
+          );
+        } else {
+          socket.send(JSON.stringify({ action: "error", data: "NO_AGENT" }));
+        }
         break;
       case "cardData":
         console.log("[LOG] agent return card data to " + connectionId + "-web");
+        const webClientName = connectionId + "-web";
+        connectedClient[webClientName].send(
+          JSON.stringify({ action: "cardData", data: msg.Data })
+        );
+        break;
+      case "registerChatClient":
+        console.log(
+          "[LOG] Web client registered chat client with UUID: " + msg.Data
+        );
+        socket.chatName = msg.Data;
+        break;
+      case "sendChat":
+        const msgObj = msg.Data;
         wss.clients.forEach(client => {
-          if (client.id == connectionId + "-web") {
-            client.send(JSON.stringify({ action: "cardData", data: msg.Data }));
+          if (client.chatName == msgObj.destClient) {
+            client.send(
+              JSON.stringify({
+                action: "chatMsg",
+                data: {
+                  owner: msgObj.owner,
+                  text: msgObj.msg,
+                  timeStamp: moment().format("lll"),
+                  local: false
+                }
+              })
+            );
           }
         });
         break;
       case "error":
-        wss.clients.forEach(client => {
-          if (client.id == connectionId + "-web") {
-            client.send(JSON.stringify({ action: "error", data: msg.Data }));
-          }
-        });
-
+        connectedClient[socket.id].send(
+          JSON.stringify({ action: "error", data: msg.Data })
+        );
         break;
     }
   });
@@ -98,6 +125,7 @@ wss.on("connection", (socket, incoming_request) => {
     console.log(err);
   });
   socket.on("close", (status, reason) => {
+    delete connectedClient[socket.id];
     console.log("Status: " + status + " " + socket.id + " is going away!");
   });
 });

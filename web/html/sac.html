@@ -12,8 +12,14 @@
     />
     <link
       rel="stylesheet"
-      href="/greedy/AdminLTE/bower_components/bootstrap/dist/css/bootstrap.min.css"
+      href="/greedy/AdminLTE4/plugins/overlayScrollbars/css/OverlayScrollbars.min.css"
     />
+    <!-- DataTables -->
+    <link
+      rel="stylesheet"
+      href="/greedy/AdminLTE4/plugins/datatables-bs4/css/dataTables.bootstrap4.css"
+    />
+    <link rel="stylesheet" href="/greedy/AdminLTE4/dist/css/adminlte.css" />
     <!-- Ionicons -->
     <link
       href="https://unpkg.com/ionicons@4.5.10-0/dist/css/ionicons.min.css"
@@ -21,246 +27,201 @@
     />
     <link rel="stylesheet" href="/greedy/Fontawesome5/css/all.css" />
     <link rel="stylesheet" href="/cosh/web_theme.css" />
-    <link rel="stylesheet" href="/greedy/AdminLTE/dist/css/AdminLTE.css" />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="/greedy/Datatables/datatables.min.css"
-    />
   </head>
-  <body class="hold-transition skin-blue sidebar-mini">
+  <body
+    class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed"
+  >
     <div class="wrapper">
-      <header class="main-header">
-        <a href="#" class="logo">
-          <span class="logo-mini">ITO</span>
-          <!-- logo for regular state and mobile devices -->
-          <span class="logo-lg"><b>MOEN</b> ICT OneStop™</span>
-        </a>
-        <nav class="navbar navbar-static-top">
-          <!-- Sidebar toggle button-->
-          <a
-            href="#"
-            class="sidebar-toggle"
-            data-toggle="push-menu"
-            role="button"
-          >
-            <i class="fas fa-bars"></i>
-            <span class="sr-only">Toggle navigation</span>
-          </a>
-          <!-- Navbar Right Menu -->
-          <div class="navbar-custom-menu">
-            <ul class="nav navbar-nav">
-              <!-- Notifications: style can be found in dropdown.less -->
-              <li class="dropdown notifications-menu">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="far fa-bell"></i>
-                  <span class="label label-warning">10</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li class="header">You have 10 notifications</li>
-                  <li>
-                    <!-- inner menu: contains the actual data -->
-                    <ul class="menu">
-                      <li>
-                        <a href="#">
-                          <i class="fas fa-users text-aqua"></i> 5 new members
-                          joined today
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <i class="fas fa-warning text-yellow"></i> Very long
-                          description here that may not fit into the page and
-                          may cause design problems
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <i class="fas fa-users text-red"></i> 5 new members
-                          joined
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <i class="fas fa-shopping-cart text-green"></i> 25
-                          sales made
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <i class="fas fa-user text-red"></i> You changed your
-                          username
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="footer"><a href="#">View all</a></li>
-                </ul>
-              </li>
-              <!-- User Account: style can be found in dropdown.less -->
-              <li class="dropdown user user-menu">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <img
-                    src="{{{account_picture}}}"
-                    class="user-image"
-                    alt="User Image"
-                  />
-                  <span class="hidden-xs">{{ account_name }}</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <!-- User image -->
-                  <li class="user-header">
-                    <img
-                      src="{{{account_picture}}}"
-                      class="img-circle"
-                      alt="User Image"
-                    />
-
-                    <p>
-                      {{ account_name }}
-                      <small>{{ account_position }}</small>
-                    </p>
-                  </li>
-                  <!-- Menu Body -->
-                  <li class="user-body">
-                    <!-- /.row -->
-                  </li>
-                  <!-- Menu Footer-->
-                  <li class="user-footer">
-                    <div class="pull-left">
-                      <a href="#" class="btn btn-default btn-flat"
-                        >ประวัติส่วนตัว</a
-                      >
-                    </div>
-                    <div class="pull-right">
-                      <a href="/signout" class="btn btn-default btn-flat"
-                        >ออกจากระบบ</a
-                      >
-                    </div>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      </header>
-     
-      <aside class="main-sidebar">
-        <section class="sidebar">
-          <div class="user-panel">
-            <div class="pull-left image">
+      <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#"
+              ><i class="fas fa-bars"></i
+            ></a>
+          </li>
+        </ul>
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
+          <!-- Messages Dropdown Menu -->
+          <li class="nav-item dropdown" id="chatDropDown">
+            <a class="nav-link" data-toggle="dropdown" href="#">
+              <i class="far fa-comments"></i>
+              <span class="badge badge-danger navbar-badge">1</span>
+            </a>
+            <div
+              class="dropdown-menu dropdown-menu-lg dropdown-menu-right"
+              id="chatMsgList"
+            ></div>
+          </li>
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
               <img
                 src="{{{account_picture}}}"
-                class="img-circle"
+                class="user-image img-circle elevation-2"
+                alt="User Image"
+              />
+              <span class="d-none d-md-inline"> {{ account_name }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+              <!-- User image -->
+              <li class="user-header">
+                <img
+                  src="{{{account_picture}}}"
+                  class="img-circle elevation-3"
+                  alt="User Image"
+                />
+                <p>
+                  {{ account_name }}
+                  <small>{{ account_position }}</small>
+                </p>
+              </li>
+              <!-- Menu Footer-->
+              <li class="user-footer">
+                <a href="#" class="btn btn-default btn-flat">ประวัติส่วนตัว</a>
+                <a href="/signout" class="btn btn-default btn-flat float-right"
+                  >ออกจากระบบ</a
+                >
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+
+      <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="#" class="brand-link">
+          <img
+            src="/imagine/moen_logo.svg"
+            class="brand-image"
+            style="opacity: .8"
+          />
+          <span class="brand-text font-weight-light">ICT OneStop™</span>
+        </a>
+
+        <div class="sidebar">
+          <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+              <img
+                src="{{{account_picture}}}"
+                class="img-circle elevation-2"
                 alt="User Image"
               />
             </div>
-            <div class="pull-left info">
-              <p>{{ account_name }}</p>
-              <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+            <div class="info">
+              <a href="#" class="d-block">{{ account_name }}</a>
             </div>
           </div>
-          <ul class="sidebar-menu" data-widget="tree">
-            {{#menu}}
-            <li class="{{ liClass }}">{{ liText }}</li>
-            {{/menu}}
-            {{#menu1}}
-            <li class="{{ liClass }}">
-              <a href="{{ aLink }}">
-                <i class="{{ liIcon }}"></i>
-                <span>
-                  {{ liText }}
-                </span>
-              </a>
-            </li>
-            {{/menu1}}
-            {{#menu2}}
-            <li class="{{ liClass }}">{{ liText }}</li>
-            {{/menu2}}
-            {{#menu3}}
-            <li class="{{ liClass }}">
-              <a href="{{ aLink }}">
-                <i class="{{ liIcon }}"></i>
-                <span>
-                  {{ liText }}
-                </span>
-              </a>
-            </li>
-            {{/menu3}}
-          </ul>
-        </section>
+          <nav class="mt-2">
+            <ul
+              class="nav nav-pills nav-sidebar flex-column"
+              data-widget="treeview"
+              role="menu"
+              data-accordion="false"
+            >
+              {{#menu}}
+              <li class="{{ liClass }}">{{ liText }}</li>
+              {{/menu}}
+              {{#menu1}}
+              <li class="{{ liClass }}">
+                <a href="{{ aLink }}" class="{{ aClass }}">
+                  <i class="{{ liIcon }}"></i>
+                  <p>
+                    {{ liText }}
+                  </p>
+                </a>
+              </li>
+              {{/menu1}}
+              {{#menu2}}
+              <li class="{{ liClass }}">{{ liText }}</li>
+              {{/menu2}}
+              {{#menu3}}
+              <li class="{{ liClass }}">
+                <a href="{{ aLink }}" class="{{ aClass }}">
+                  <i class="{{ liIcon }}"></i>
+                  <p>
+                    {{ liText }}
+                  </p>
+                </a>
+              </li>
+              {{/menu3}}
+            </ul>
+          </nav>
+        </div>
       </aside>
 
       <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
-        <div class="content-header">
+        <section class="content-header">
           <div class="container-fluid">
             <div class="row mb-2">
               <div class="col-sm-6">
-                <h1 class="m-0 text-dark">{{ page_name }}</h1>
+                <h1 class="m-0 text-dark">
+                  {{ page_name }}
+                </h1>
               </div>
             </div>
-            <div class="row">
-              <div class="col-12">
-                <div class="box">
-                  <div class="box-header"></div>
-                  <div class="box-body">
-                    <table
-                      id="userTable"
-                      class="table table-striped table-bordered"
-                      style="width:100%"
+          </div>
+        </section>
+        <section class="content">
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body">
+                  <table
+                    id="userTable"
+                    class="table table-striped table-bordered"
+                    style="width:100%"
+                  >
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th class="text-center">ประเภท</th>
+                        <th class="text-center">ชื่อ-นามสกุล (ไทย)</th>
+                        <th class="text-center">ชื่อ-นามสกุล (อังกฤษ)</th>
+                        <th class="text-center">ตำแหน่ง</th>
+                        <th class="text-center">กลุ่มงาน</th>
+                        <th class="text-center">หน่วยงาน</th>
+                        <th class="text-center">สังกัด</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                  <br />
+                  <div class="dropdown">
+                    <button
+                      class="btn btn-success pull-right dropdown-toggle"
+                      type="button"
+                      id="dropdownMenuButton"
+                      data-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
                     >
-                      <thead>
-                        <tr>
-                          <th></th>
-                          <th class="text-center">ประเภท</th>
-                          <th class="text-center">ชื่อ-นามสกุล (ไทย)</th>
-                          <th class="text-center">ชื่อ-นามสกุล (อังกฤษ)</th>
-                          <th class="text-center">ตำแหน่ง</th>
-                          <th class="text-center">กลุ่มงาน</th>
-                          <th class="text-center">หน่วยงาน</th>
-                          <th class="text-center">สังกัด</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody></tbody>
-                    </table>
-                    <br />
-                    <div class="btn-group">
-                      <button
-                        class="btn btn-success pull-right dropdown-toggle"
-                        type="button"
-                        data-toggle="dropdown"
-                        aria-expanded="true"
+                      เพิ่มเจ้าหน้าที่
+                    </button>
+                    <div
+                      class="dropdown-menu"
+                      aria-labelledby="dropdownMenuButton"
+                    >
+                      <a
+                        class="dropdown-item"
+                        data-toggle="modal"
+                        data-target="#idInsertModal"
+                        id="id-insert"
+                        href="#"
+                        >ใช้บัตรประชาชน</a
                       >
-                        เพิ่มเจ้าหน้าที่ <span class="caret"></span>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li
-                          id="id-insert"
-                          data-toggle="modal"
-                          data-target="#idInsertModal"
-                        >
-                          <a href="#">ใช้บัตรประชาชน</a>
-                        </li>
-                        <li id="raw-insert">
-                          <a href="#">กรอกข้อมูลผ่านฟอร์ม</a>
-                        </li>
-                      </ul>
+                      <a class="dropdown-item" id="raw-insert" href="#"
+                        >กรอกข้อมูลผ่านฟอร์ม</a
+                      >
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- /.container-fluid -->
-        </div>
-        <!-- /.content-header -->
-
-        <!-- Main content -->
-        <section class="content"></section>
-        <!-- /.content -->
+        </section>
       </div>
+
       <footer class="main-footer">
         <strong
           >Copyright &copy; 2019
@@ -270,17 +231,14 @@
       </footer>
     </div>
     <!-- Insert id modal -->
-    <div
-      class="modal fade"
-      id="idInsertModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="gridSystemModalLabel"
-    >
+    <div class="modal fade" id="idInsertModal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <form method="POST" id="identityForm">
             <div class="modal-header">
+              <h4 class="modal-title">
+                เพิ่มข้อมูลโดยบัตรประขาชน
+              </h4>
               <button
                 type="button"
                 class="close"
@@ -289,261 +247,214 @@
               >
                 <span aria-hidden="true">&times;</span>
               </button>
-              <h4 class="modal-title" id="gridSystemModalLabel">
-                เพิ่มข้อมูลโดยบัตรประขาชน
-              </h4>
             </div>
             <div class="modal-body">
-              <div class="row">
-                <div class="col-md-12">
-                  <h4>ข้อมูลบัตรประชาชน</h4>
+              <div class="row col-12">
+                <h4>ข้อมูลบัตรประชาชน</h4>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-12 form-inline">
+                  <label class="control-label mr-3">เลขบัตรประชาชน</label>
+                  <input class="form-control mr-3 identityID" disabled />
+                  <button
+                    class="btn btn-primary pull-right readCard"
+                    type="button"
+                  >
+                    อ่านบัตร
+                  </button>
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-2">
-                      <label for="identityID" class="control-label"
-                        >เลขบัตรประชาชน</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" name="identityID" disabled />
-                    </div>
-                    <div class="col-md-6">
-                      <button
-                        class="btn btn-primary pull-right"
-                        id="readCard"
-                        type="button"
-                      >
-                        อ่านบัตร
-                      </button>
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label class="control-label mr-3">ชื่อ-นามสกุล ไทย</label>
+                  <input class="form-control thaiName" disabled />
+                </div>
+                <div class="form-group col-6">
+                  <label class="control-label mr-3"
+                    >ชื่อ-นามสกุล ภาษาอังกฤษ</label
+                  >
+                  <input class="form-control engName" disabled />
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-2">
-                      <label for="thaiName" class="control-label"
-                        >ชื่อ-นามสกุล ไทย</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" name="thaiName" disabled />
-                    </div>
-                    <div class="col-md-2">
-                      <label for="engName" class="control-label"
-                        >ชื่อ-นามสกุล ภาษาอังกฤษ</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" name="engName" disabled />
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6 form-inline">
+                  <label class="control-label mr-3">เพศ</label>
+                  <input class="form-control sex" disabled />
+                </div>
+                <div class="form-group col-6 form-inline">
+                  <label class="control-label mr-3">วันเกิด</label>
+                  <input class="form-control birthDate" disabled />
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-1">
-                      <label class="control-label">เพศ</label>
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" name="sex" disabled />
-                    </div>
-                    <div class="col-md-1">
-                      <label class="control-label">วันเกิด</label>
-                    </div>
-                    <div class="col-md-6">
-                      <input class="form-control" name="birthDate" disabled />
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6 form-inline">
+                  <label class="control-label mr-3">เบอร์มือถือ</label>
+                  <input class="form-control userMobile" />
+                </div>
+                <div class="form-group col-6 form-inline">
+                  <label class="control-label mr-3">เบอร์โทรศัพท์บ้าน</label>
+                  <input class="form-control userTel" />
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-2">
-                      <label for="userMobile" class="control-label"
-                        >เบอร์มือถือ</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" id="userMobile" />
-                    </div>
-                    <div class="col-md-2">
-                      <label for="userTel" class="control-label"
-                        >เบอร์โทรศัพท์บ้าน</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" id="userTel" />
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-12">
+                  <label class="control-label">รูปถ่าย</label>
+                  <img
+                    class="img-responsive img-thumbnail mx-auto d-block identPic"
+                  />
                 </div>
               </div>
-              <div class="row">
-                <div class="col-md-3">
-                  <label for="identPic" class="control-label">รูปถ่าย</label>
-                </div>
-                <div class="col-md-9">
-                  <img alt="xD" id="identPic" class="img-responsive" />
-                </div>
-              </div>
-              <br />
-              <div class="row col-md-12">
+              <hr />
+              <div class="row col-12">
                 <h4>ข้อมูลสังกัด</h4>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-2">
-                      <label for="section" class="control-label"
-                        >หน่วยงาน</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <select class="form-control" name="section"> </select>
-                    </div>
-                    <div class="col-md-1">
-                      <label for="department" class="control-label"
-                        >สำนัก</label
-                      >
-                    </div>
-                    <div class="col-md-5">
-                      <select class="form-control" name="department"> </select>
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label class="control-label">หน่วยงาน</label>
+                  <select class="custom-select sectionList"> </select>
+                </div>
+                <div class="form-group col-6">
+                  <label class="control-label">สำนัก</label>
+                  <select class="custom-select departmentList"> </select>
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group row">
-                  <div class="col-md-2">
-                    <label for="workgroup" class="control-label"
-                      >กลุ่มงาน</label
-                    >
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="workgroup"> </select>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label class="control-label">กลุ่มงาน</label>
+                  <select class="custom-select workgroupList"> </select>
+                </div>
+                <div class="form-group col-6">
+                  <label class="control-label">ประเภทเจ้าหน้าที่</label>
+                  <select class="custom-select emptypeList"></select>
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group row">
-                  <div class="col-md-2">
-                    <label for="emptype" class="control-label"
-                      >ประเภทเจ้าหน้าที่</label
-                    >
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="emptype"></select>
-                  </div>
-                  <div class="col-md-2">
-                    <label for="empjob" class="control-label"
-                      >ประเภทสายงาน</label
-                    >
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="empjob"></select>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-3">
+                  <label class="control-label">ประเภทสายงาน</label>
+                  <select class="custom-select empjobList"></select>
+                </div>
+                <div class="form-group col-3">
+                  <label for="emplevel" class="control-label"
+                    >ระดับเจ้าหน้าที่</label
+                  >
+                  <select class="custom-select emplevelList"></select>
+                </div>
+                <div class="form-group col-6">
+                  <label class="control-label">ตำแหน่งงาน</label>
+                  <select class="custom-select empposList"></select>
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group row">
-                  <div class="col-md-2">
-                    <label for="emplevel" class="control-label"
-                      >ระดับเจ้าหน้าที่</label
-                    >
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="emplevel"></select>
-                  </div>
-                  <div class="col-md-2">
-                    <label for="emppos" class="control-label">ตำแหน่งงาน</label>
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="emppos"></select>
-                  </div>
-                </div>
-              </div>
-              <div class="row col-md-12">
+              <hr />
+              <div class="row col-12">
                 <h4>ระบบที่ต้องการใช้งาน</h4>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="leavesys" />
-                      ระบบลาราชการ
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="esarabunsys" />
-                      ระบบ e-sarabun
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="emailsys" />
-                      e-mail
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="eMeetsys" />
-                      ระบบนัดหมาย e-office
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="eDocKeepsys" />
-                      ระบบเอกสารอิเล็คทรอนิกส์ - จัดเก็บเอกสาร
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="eDocCirsys" />
-                      ระบบเอกสารอิเล็คทรอนิกส์ - หนังสือเวียน
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="eDocPRsys" />
-                      ระบบเอกสารอิเล็คทรอนิกส์ - ประชาสัมพันธ์
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="vpnsys" />
-                      ระบบ VPN
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="carsys" />
-                      ระบบจองรถ
-                    </label>
-                  </div>
-                </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input leavesys"
+                  id="checkbox1"
+                />
+                <label for="checkbox1" class="custom-control-label">
+                  ระบบลาราชการ
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input esarabunsys"
+                  id="checkbox2"
+                />
+                <label for="checkbox2" class="custom-control-label">
+                  ระบบ e-sarabun
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input emailsys"
+                  id="checkbox3"
+                />
+                <label for="checkbox3" class="custom-control-label">
+                  e-mail
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input eMeetsys"
+                  id="checkbox4"
+                />
+                <label for="checkbox4" class="custom-control-label">
+                  ระบบนัดหมาย e-office
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  id="checkbox5"
+                  class="custom-control-input eDocKeepsys"
+                />
+                <label for="checkbox5" class="custom-control-label">
+                  ระบบเอกสารอิเล็คทรอนิกส์ - จัดเก็บเอกสาร
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input eDocCirsys"
+                  id="checkbox6"
+                />
+                <label for="checkbox6" class="custom-control-label">
+                  ระบบเอกสารอิเล็คทรอนิกส์ - หนังสือเวียน
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input eDocPRsys"
+                  id="checkbox8"
+                />
+                <label for="checkbox8" class="custom-control-label">
+                  ระบบเอกสารอิเล็คทรอนิกส์ - ประชาสัมพันธ์
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input vpnsys"
+                  id="checkbox9"
+                />
+                <label for="checkbox9" class="custom-control-label">
+                  ระบบ VPN
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input carsys"
+                  id="checkbox10"
+                />
+                <label for="checkbox10" class="custom-control-label">
+                  ระบบจองรถ
+                </label>
               </div>
             </div>
             <div class="modal-footer">
@@ -565,17 +476,14 @@
       <!-- /.modal-dialog -->
     </div>
     <!--Update id modal-->
-    <div
-      class="modal fade"
-      id="idUpdateModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="gridSystemModalLabel"
-    >
+    <div class="modal fade" id="idUpdateModal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <form method="POST" id="identityUpdateForm">
             <div class="modal-header">
+              <h4 class="modal-title">
+                แก้ไข/ลบข้อมูลผู้ใช้งานระบบ
+              </h4>
               <button
                 type="button"
                 class="close"
@@ -584,261 +492,216 @@
               >
                 <span aria-hidden="true">&times;</span>
               </button>
-              <h4 class="modal-title" id="gridSystemModalLabel">
-                แก้ไข/ลบข้อมูลผู้ใช้งานระบบ
-              </h4>
             </div>
             <div class="modal-body">
-              <div class="row">
-                <div class="col-md-12">
-                  <h4>ข้อมูลบัตรประชาชน</h4>
+              <div class="row col-12">
+                <h4>ข้อมูลบัตรประชาชน</h4>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-12 form-inline">
+                  <label for="identityID" class="control-label mr-3"
+                    >เลขบัตรประชาชน</label
+                  >
+                  <input class="form-control mr-3 identityID" disabled />
+                  <button
+                    class="btn btn-primary pull-right"
+                    id="readCard"
+                    type="button"
+                  >
+                    อ่านบัตร
+                  </button>
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-2">
-                      <label for="identityID" class="control-label"
-                        >เลขบัตรประชาชน</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" name="identityID" disabled />
-                    </div>
-                    <div class="col-md-6">
-                      <button
-                        class="btn btn-primary pull-right"
-                        id="readCard"
-                        type="button"
-                      >
-                        อ่านบัตร
-                      </button>
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label for="thaiName" class="control-label"
+                    >ชื่อ-นามสกุล ไทย</label
+                  >
+                  <input class="form-control thaiName" disabled />
+                </div>
+                <div class="form-group col-6">
+                  <label for="engName" class="control-label"
+                    >ชื่อ-นามสกุล ภาษาอังกฤษ</label
+                  >
+                  <input class="form-control engName" disabled />
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-2">
-                      <label for="thaiName" class="control-label"
-                        >ชื่อ-นามสกุล ไทย</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" name="thaiName" disabled />
-                    </div>
-                    <div class="col-md-2">
-                      <label for="engName" class="control-label"
-                        >ชื่อ-นามสกุล ภาษาอังกฤษ</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" name="engName" disabled />
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label class="control-label">เพศ</label>
+                  <input class="form-control sex" disabled />
+                </div>
+                <div class="form-group col-6">
+                  <label class="control-label">วันเกิด</label>
+                  <input class="form-control birthDate" disabled />
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-1">
-                      <label class="control-label">เพศ</label>
-                    </div>
-                    <div class="col-md-4">
-                      <input class="form-control" name="sex" disabled />
-                    </div>
-                    <div class="col-md-1">
-                      <label class="control-label">วันเกิด</label>
-                    </div>
-                    <div class="col-md-6">
-                      <input class="form-control" name="birthDate" disabled />
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label class="control-label">เบอร์มือถือ</label>
+                  <input class="form-control userMobile" />
+                </div>
+                <div class="form-group col-6">
+                  <label class="control-label">เบอร์โทรศัพท์บ้าน</label>
+                  <input class="form-control userTel" />
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-2">
-                      <label for="userMobile" class="control-label"
-                        >เบอร์มือถือ</label
-                      >
-                    </div>
-                    <div class="col-md-3">
-                      <input class="form-control" name="userMobile" />
-                    </div>
-                    <div class="col-md-2">
-                      <label for="userTel" class="control-label"
-                        >เบอร์โทรศัพท์บ้าน</label
-                      >
-                    </div>
-                    <div class="col-md-5">
-                      <input class="form-control" name="userTel" />
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-12">
+                  <label class="control-label">รูปถ่าย</label>
+                  <img
+                    class="img-responsive img-thumbnail mx-auto d-block identPic"
+                  />
                 </div>
               </div>
-              <div class="row">
-                <div class="col-md-3">
-                  <label for="identPic" class="control-label">รูปถ่าย</label>
-                </div>
-                <div class="col-md-9">
-                  <img alt="xD" id="identPic" class="img-responsive" />
-                </div>
-              </div>
-              <br />
-              <div class="row col-md-12">
+              <hr />
+              <div class="row col-12">
                 <h4>ข้อมูลสังกัด</h4>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="row">
-                    <div class="col-md-2">
-                      <label for="section" class="control-label"
-                        >หน่วยงาน</label
-                      >
-                    </div>
-                    <div class="col-md-4">
-                      <select class="form-control" name="section"> </select>
-                    </div>
-                    <div class="col-md-1">
-                      <label for="department" class="control-label"
-                        >สำนัก</label
-                      >
-                    </div>
-                    <div class="col-md-5">
-                      <select class="form-control" name="department"> </select>
-                    </div>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label for="section" class="control-label">หน่วยงาน</label>
+                  <select class="custom-select sectionList"> </select>
+                </div>
+                <div class="form-group col-6">
+                  <label for="department" class="control-label">สำนัก</label>
+                  <select class="custom-select departmentList"> </select>
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group row">
-                  <div class="col-md-2">
-                    <label for="workgroup" class="control-label"
-                      >กลุ่มงาน</label
-                    >
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="workgroup"> </select>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label class="control-label">กลุ่มงาน</label>
+                  <select class="custom-select workgroupList"> </select>
+                </div>
+                <div class="form-group col-6">
+                  <label class="control-label">ประเภทเจ้าหน้าที่</label>
+                  <select class="custom-select emptypeList"></select>
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group row">
-                  <div class="col-md-2">
-                    <label for="emptype" class="control-label"
-                      >ประเภทเจ้าหน้าที่</label
-                    >
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="emptype"></select>
-                  </div>
-                  <div class="col-md-2">
-                    <label for="empjob" class="control-label"
-                      >ประเภทสายงาน</label
-                    >
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="empjob"></select>
-                  </div>
+              <div class="form-row">
+                <div class="form-group col-4">
+                  <label class="control-label">ประเภทสายงาน</label>
+                  <select class="custom-select empjobList"></select>
+                </div>
+                <div class="form-group col-4">
+                  <label class="control-label">ระดับเจ้าหน้าที่</label>
+                  <select class="custom-select emplevelList"></select>
+                </div>
+                <div class="form-group col-4">
+                  <label class="control-label">ตำแหน่งงาน</label>
+                  <select class="custom-select empposList"></select>
                 </div>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group row">
-                  <div class="col-md-2">
-                    <label for="emplevel" class="control-label"
-                      >ระดับเจ้าหน้าที่</label
-                    >
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="emplevel"></select>
-                  </div>
-                  <div class="col-md-2">
-                    <label for="emppos" class="control-label">ตำแหน่งงาน</label>
-                  </div>
-                  <div class="col-md-4">
-                    <select class="form-control" name="emppos"></select>
-                  </div>
-                </div>
-              </div>
-              <div class="row col-md-12">
+              <div class="row col-12">
                 <h4>ระบบที่ต้องการใช้งาน</h4>
               </div>
-              <div class="row col-md-12">
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="leavesys" />
-                      ระบบลาราชการ
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="esarabunsys" />
-                      ระบบ e-sarabun
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="emailsys" />
-                      e-mail
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="eMeetsys" />
-                      ระบบนัดหมาย e-office
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="eDocKeepsys" />
-                      ระบบเอกสารอิเล็คทรอนิกส์ - จัดเก็บเอกสาร
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="eDocCirsys" />
-                      ระบบเอกสารอิเล็คทรอนิกส์ - หนังสือเวียน
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="eDocPRsys" />
-                      ระบบเอกสารอิเล็คทรอนิกส์ - ประชาสัมพันธ์
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="vpnsys" />
-                      ระบบ VPN
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" name="carsys" />
-                      ระบบจองรถ
-                    </label>
-                  </div>
-                </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input leavesys"
+                  id="checkbox1"
+                />
+                <label for="checkbox1" class="custom-control-label">
+                  ระบบลาราชการ
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input esarabunsys"
+                  id="checkbox2"
+                />
+                <label for="checkbox2" class="custom-control-label">
+                  ระบบ e-sarabun
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input emailsys"
+                  id="checkbox3"
+                />
+                <label for="checkbox3" class="custom-control-label">
+                  e-mail
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input eMeetsys"
+                  id="checkbox4"
+                />
+                <label for="checkbox4" class="custom-control-label">
+                  ระบบนัดหมาย e-office
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  id="checkbox5"
+                  class="custom-control-input eDocKeepsys"
+                />
+                <label for="checkbox5" class="custom-control-label">
+                  ระบบเอกสารอิเล็คทรอนิกส์ - จัดเก็บเอกสาร
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input eDocCirsys"
+                  id="checkbox6"
+                />
+                <label for="checkbox6" class="custom-control-label">
+                  ระบบเอกสารอิเล็คทรอนิกส์ - หนังสือเวียน
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input eDocPRsys"
+                  id="checkbox8"
+                />
+                <label for="checkbox8" class="custom-control-label">
+                  ระบบเอกสารอิเล็คทรอนิกส์ - ประชาสัมพันธ์
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input vpnsys"
+                  id="checkbox9"
+                />
+                <label for="checkbox9" class="custom-control-label">
+                  ระบบ VPN
+                </label>
+              </div>
+              <div
+                class="form-row col-12 form-group custom-control custom-checkbox ml-3"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-control-input carsys"
+                  id="checkbox10"
+                />
+                <label for="checkbox10" class="custom-control-label">
+                  ระบบจองรถ
+                </label>
               </div>
             </div>
             <div class="modal-footer">
@@ -859,36 +722,98 @@
       </div>
       <!-- /.modal-dialog -->
     </div>
+    <!--Chat modal-->
+    <div class="modal" tabindex="-1" role="dialog" id="chatModal">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="direct-chat-messages" id="chatScreen">
+              <!--  <div class="direct-chat-msg">
+                <div class="direct-chat-info clearfix">
+                  <span class="direct-chat-name pull-left"
+                    >Alexander Pierce</span
+                  >
+                  <span class="direct-chat-timestamp pull-right"
+                    >23 Jan 2:00 pm</span
+                  >
+                </div>
+                <img
+                  class="direct-chat-img"
+                  src="../dist/img/user1-128x128.jpg"
+                  alt="Message User Image"
+                />
+                <div class="direct-chat-text">
+                  Is this template really for free? That's unbelievable!
+                </div>
+              </div>
+              <div class="direct-chat-msg right">
+                <div class="direct-chat-info clearfix">
+                  <span class="direct-chat-name pull-right">Sarah Bullock</span>
+                  <span class="direct-chat-timestamp pull-left"
+                    >23 Jan 2:05 pm</span
+                  >
+                </div>
+                <img
+                  class="direct-chat-img"
+                  src="../dist/img/user3-128x128.jpg"
+                  alt="Message User Image"
+                />
+                <div class="direct-chat-text">
+                  You better believe it!
+                </div>
+              </div> -->
+            </div>
+            <form method="POST" id="chatForm">
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control chatText"
+                  placeholder="พิมพ์ข้อความตรงเน้!!"
+                />
+                <div class="input-group-append">
+                  <button class="btn btn-success" type="submit">
+                    ส่ง
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script type="text/javascript" src="/josh/jquery.js"></script>
+    <!-- Bootstrap -->
     <script
       type="text/javascript"
-      src="/greedy/AdminLTE/bower_components/bootstrap/dist/js/bootstrap.min.js"
+      src="/greedy/AdminLTE4/plugins/bootstrap/js/bootstrap.bundle.min.js"
     ></script>
-    <!-- FastClick -->
+    <!-- overlayScrollbars -->
     <script
       type="text/javascript"
-      src="/greedy/AdminLTE/bower_components/fastclick/lib/fastclick.js"
+      src="/greedy/AdminLTE4/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"
     ></script>
+    <script type="text/javascript" src="/greedy/momentjs/moment.js"></script>
     <!-- AdminLTE App -->
-    <script
-      type="text/javascript"
-      src="/greedy/AdminLTE/dist/js/adminlte.min.js"
-    ></script>
-    <!-- Sparkline -->
-    <script
-      type="text/javascript"
-      src="/greedy/AdminLTE/bower_components/jquery-sparkline/dist/jquery.sparkline.min.js"
-    ></script>
-    <!-- SlimScroll -->
-    <script
-      type="text/javascript"
-      src="/greedy/AdminLTE/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="/greedy/Datatables/datatables.min.js"
-    ></script>
+    <script type="text/javascript" src="/greedy/AdminLTE4/plugins/datatables/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="/greedy/AdminLTE4/plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+    <script type="text/javascript" src="/greedy/AdminLTE4/dist/js/adminlte.min.js"></script>
+    <!-- jQuery Mapael -->
+    <script type="text/javascript" src="/greedy/AdminLTE4/plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="/greedy/AdminLTE4/plugins/raphael/raphael.min.js"></script>
+    <script type="text/javascript" src="/greedy/AdminLTE4/plugins/jquery-mapael/jquery.mapael.min.js"></script>
+    <script type="text/javascript" src="/greedy/AdminLTE4/plugins/jquery-mapael/maps/usa_states.min.js"></script>
     <script type="text/javascript" src="/josh/sac_reg.js"></script>
   </body>
 </html>

@@ -52,6 +52,7 @@ const listEmployeeLevel = Officer.listEmployeeLevel;
 const listEmployeePosition = Officer.listEmployeePosition;
 const resolveOfficer = Officer.resolveOfficer;
 const insertEmployee = Ldap.insertUser;
+const listUserContacts = Officer.listUserContacts;
 
 module.exports = {
   listOfficer: listOfficer,
@@ -65,6 +66,7 @@ module.exports = {
   insertEmployee: insertEmployee,
   isUserExists: isUserExists,
   resolveOfficer: resolveOfficer,
+  listUserContacts: listUserContacts,
   checkAPIUserRole: checkAPIUserRole,
   listAPIKey: listAPIKey,
   insertAPI: insertAPI,

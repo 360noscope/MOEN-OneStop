@@ -188,14 +188,16 @@ const resolveOfficer = params => {
               userMobile: results[0].Mobile,
               userTel: results[0].Tel,
               birthDate: results[0].Birthday,
-              identPic: results[0].photoRaw,
+              photo: results[0].photoRaw,
               houseNo: results[0].addHouseNo,
               villageNo: results[0].addVillageNo,
               tambol: results[0].addTambol,
               amphur: results[0].addAmphur,
               province: results[0].addProvince,
               sexId: results[0].sex,
-              sex: sexName[results[0].sex],
+              sex: sexName[results[0].sex]
+            },
+            office: {
               section: results[0].sectionId,
               workgroup: results[0].workgroupUUID,
               emptype: results[0].empTypeiD,
@@ -222,6 +224,21 @@ const resolveOfficer = params => {
     );
   });
 };
+const listUserContacts = uuid => {
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      "SELECT th_prefix, AD_UUID, th_firstname, th_lastname, en_firstname, en_lastname, photoRaw FROM moen_officer WHERE AD_UUID != ?",
+      [uuid],
+      (err, results, fields) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      }
+    );
+  });
+};
 
 module.exports = {
   listOfficer: listOfficer,
@@ -232,5 +249,6 @@ module.exports = {
   listEmployeeJob: listEmployeeJob,
   listEmployeeLevel: listEmployeeLevel,
   listEmployeePosition: listEmployeePosition,
-  resolveOfficer: resolveOfficer
+  resolveOfficer: resolveOfficer,
+  listUserContacts: listUserContacts
 };

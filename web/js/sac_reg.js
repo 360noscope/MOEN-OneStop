@@ -1,4 +1,6 @@
 let userTable, wSocket, personData;
+let chatMsgObject = {};
+
 $(document).ready(() => {
   const wsCheck = () => {
     if (!wSocket || wSocket.readyState === wSocket.CLOSED) startConnection();
@@ -8,6 +10,12 @@ $(document).ready(() => {
     wSocket = new WebSocket("wss://172.19.0.250:443/?type=web");
     wSocket.onopen = event => {
       console.log("Web socket connected!");
+      wSocket.send(
+        JSON.stringify({
+          Action: "registerChatClient",
+          Data: localStorage.getItem("chatUUID")
+        })
+      );
     };
     wSocket.onmessage = event => {
       const sexName = { 1: "ชาย", 2: "หญิง" };
@@ -17,31 +25,66 @@ $(document).ready(() => {
       switch (returnMsg.action) {
         case "cardData":
           $("#identityForm button[type=submit]").attr("disabled", false);
-          $("#identityID").val(returnData.Id);
-          $("#thaiName").val(
+          $("#identityForm .identityID").val(returnData.Id);
+          $("#identityForm .thaiName").val(
             returnData.Th_prefix +
               " " +
               returnData.Th_firstname +
               " " +
               returnData.Th_lastname
           );
-          $("#engName").val(
+          $("#identityForm .engName").val(
             returnData.Eng_prefix +
               " " +
               returnData.Eng_firstname +
               " " +
               returnData.Eng_lastname
           );
-          $("#sex").val(sexName[returnData.Sex]);
-          $("#birthDate").val(returnData.BDate);
-          $("#issueDate").val(returnData.Issued_date);
-          $("#expiredDate").val(returnData.Expired_date);
-          $("#identPic").attr("src", returnData.Picture);
+          $("#identityForm .sex").val(sexName[returnData.Sex]);
+          $("#identityForm .birthDate").val(returnData.BDate);
+          $("#identityForm .identPic").attr("src", returnData.Picture);
+          break;
+        case "chatMsg":
+          if (!chatMsgObject.hasOwnProperty(returnData.msgOwner)) {
+            chatMsgObject[returnData.msgOwner] = [];
+          }
+          chatMsgObject[returnData.msgOwner].push(returnData);
+          if (!chatMsgObject.hasOwnProperty(returnData.msgOwner)) {
+            chatMsgObject[returnData.msgOwner] = [];
+          }
+          chatMsgObject[returnData.msgOwner].push(returnData);
+          let chatName = $(
+            "<span class='direct-chat-name pull-left'>" + msg.owner + "</span>"
+          );
+          let chatTime = $(
+            "<span class='direct-chat-timestamp pull-right'> " +
+              msg.timeStamp +
+              "</span>"
+          );
+          let chatNameNStamp = $("<div class='direct-chat-info clearfix'>");
+          chatNameNStamp.append(chatName);
+          chatNameNStamp.append(chatTime);
+
+          let chatText = $(
+            "<div class='direct-chat-text'>" + msg.text + "</div>"
+          );
+          let chatMsg;
+          if (msg.local) {
+            chatMsg = $("<div class='direct-chat-msg right'>");
+          } else {
+            chatMsg = $("<div class='direct-chat-msg'>");
+          }
+          chatMsg.append(chatNameNStamp);
+          chatMsg.append(chatText);
+          $("#chatScreen").append(chatMsg);
           break;
         case "error":
           if (returnData == "NO_READER") {
             $("#identityForm button[type=submit]").attr("disabled", true);
             alert("ไม่ได้เสียบเครื่องอ่านหรือยังไม่ได้เสียบการ์ด");
+          } else if (returnData == "NO_AGENT") {
+            $("#identityForm button[type=submit]").attr("disabled", true);
+            alert("ไม่ได้รันตัว AGENT");
           }
           break;
       }
@@ -52,7 +95,6 @@ $(document).ready(() => {
     };
   };
   setInterval(startConnection(), 5000);
-
   userTable = $("#userTable").DataTable({
     paging: true,
     processing: true,
@@ -138,35 +180,31 @@ const listSection = selected_form => {
     $.get("https://172.19.0.250/listSection")
       .done(data => {
         if (data.length > 0) {
-          selected_form.find("select[name=section]").attr("disabled", false);
+          selected_form.find(".sectionList").attr("disabled", false);
           selected_form
-            .find("select[name=section]")
+            .find(".sectionList")
             .find("option")
             .remove()
             .end();
           data.forEach(item => {
-            selected_form.find("select[name=section]").append(
+            selected_form.find(".sectionList").append(
               $("<option />")
                 .val(item.sectionId)
                 .text(item.sectionName)
             );
           });
           if (selectedOption.hasOwnProperty("section")) {
-            $(document).off("change", "select[name=section]");
+            $(document).off("change", ".sectionList");
             selected_form
-              .find("select[name=section]")
+              .find(".sectionList")
               .val(selectedOption.section)
               .change();
-            $(document).on(
-              "change",
-              "select[name=section]",
-              sectionChangeEvent
-            );
+            $(document).on("change", ".sectionList", sectionChangeEvent);
           }
         } else {
-          selected_form.find("select[name=section]").attr("disabled", true);
+          selected_form.find(".sectionList").attr("disabled", true);
           selected_form
-            .find("select[name=section]")
+            .find(".sectionList")
             .find("option")
             .remove()
             .end()
@@ -189,40 +227,36 @@ const listSection = selected_form => {
 const listDepartment = selected_form => {
   return new Promise((resolve, reject) => {
     const selectedSect = selected_form
-      .find("select[name=section] option:selected")
+      .find(".sectionList option:selected")
       .val();
     $.post("https://172.19.0.250/listDept", { sectionid: selectedSect })
       .done(data => {
         if (data.length > 0) {
-          selected_form.find("select[name=department]").attr("disabled", false);
+          selected_form.find(".departmentList").attr("disabled", false);
           selected_form
-            .find("select[name=department]")
+            .find(".departmentList")
             .find("option")
             .remove()
             .end();
           data.forEach(item => {
-            selected_form.find("select[name=department]").append(
+            selected_form.find(".departmentList").append(
               $("<option />")
                 .val(item.deptUUID)
                 .text(item.deptName)
             );
           });
           if (selectedOption.hasOwnProperty("department")) {
-            $(document).off("change", "select[name=department]");
+            $(document).off("change", ".departmentList");
             selected_form
-              .find("select[name=department]")
+              .find(".departmentList")
               .val(selectedOption.department)
               .change();
-            $(document).on(
-              "change",
-              "select[name=department]",
-              departmentChangeEvent
-            );
+            $(document).on("change", ".departmentList", departmentChangeEvent);
           }
         } else {
-          selected_form.find("select[name=department]").attr("disabled", true);
+          selected_form.find(".departmentList").attr("disabled", true);
           selected_form
-            .find("select[name=department]")
+            .find(".departmentList")
             .find("option")
             .remove()
             .end()
@@ -245,19 +279,19 @@ const listDepartment = selected_form => {
 const listWorkgroup = selected_form => {
   return new Promise((resolve, reject) => {
     const selected_dept = selected_form
-      .find("select[name=department] option:selected")
+      .find(".departmentList option:selected")
       .val();
     $.post("https://172.19.0.250/listWorkgroup", { deptuuid: selected_dept })
       .done(data => {
         if (data.length > 0) {
-          selected_form.find("select[name=workgroup]").attr("disabled", false);
+          selected_form.find(".workgroupList").attr("disabled", false);
           selected_form
-            .find("select[name=workgroup]")
+            .find(".workgroupList")
             .find("option")
             .remove()
             .end();
           data.forEach(item => {
-            selected_form.find("select[name=workgroup]").append(
+            selected_form.find(".workgroupList").append(
               $("<option />")
                 .val(item.groupUUID)
                 .text(item.groupName)
@@ -265,14 +299,14 @@ const listWorkgroup = selected_form => {
           });
           if (selectedOption.hasOwnProperty("workgroup")) {
             selected_form
-              .find("select[name=workgroup]")
+              .find(".workgroupList")
               .val(selectedOption.workgroup)
               .change();
           }
         } else {
-          selected_form.find("select[name=workgroup]").attr("disabled", true);
+          selected_form.find(".workgroupList").attr("disabled", true);
           selected_form
-            .find("select[name=workgroup]")
+            .find(".workgroupList")
             .find("option")
             .remove()
             .end()
@@ -297,35 +331,31 @@ const listEmployeeType = selected_form => {
     $.get("https://172.19.0.250/listEmployeeType")
       .done(data => {
         if (data.length > 0) {
-          selected_form.find("select[name=emptype]").attr("disabled", false);
+          selected_form.find(".emptypeList").attr("disabled", false);
           selected_form
-            .find("select[name=emptype]")
+            .find(".emptypeList")
             .find("option")
             .remove()
             .end();
           data.forEach(item => {
-            selected_form.find("select[name=emptype]").append(
+            selected_form.find(".emptypeList").append(
               $("<option />")
                 .val(item.typeId)
                 .text(item.typeName)
             );
           });
           if (selectedOption.hasOwnProperty("emptype")) {
-            $(document).off("change", "select[name=emptype]");
+            $(document).off("change", ".emptypeList");
             selected_form
-              .find("select[name=emptype]")
+              .find(".emptypeList")
               .val(selectedOption.emptype)
               .change();
-            $(document).on(
-              "change",
-              "select[name=emptype]",
-              emptypeChangeEvent
-            );
+            $(document).on("change", ".emptypeList", emptypeChangeEvent);
           }
         } else {
-          selected_form.find("select[name=emptype]").attr("disabled", true);
+          selected_form.find(".emptypeList").attr("disabled", true);
           selected_form
-            .find("select[name=emptype]")
+            .find(".emptypeList")
             .find("option")
             .remove()
             .end()
@@ -348,19 +378,19 @@ const listEmployeeType = selected_form => {
 const listEmployeeJob = selected_form => {
   return new Promise((resolve, reject) => {
     const selected_type = selected_form
-      .find("select[name=emptype] option:selected")
+      .find(".emptypeList option:selected")
       .val();
     $.post("https://172.19.0.250/listEmployeeJob", { typeId: selected_type })
       .done(data => {
         if (data.length > 0) {
-          selected_form.find("select[name=empjob]").attr("disabled", false);
+          selected_form.find(".empjobList").attr("disabled", false);
           selected_form
-            .find("select[name=empjob]")
+            .find(".empjobList")
             .find("option")
             .remove()
             .end();
           data.forEach(item => {
-            selected_form.find("select[name=empjob]").append(
+            selected_form.find(".empjobList").append(
               $("<option />")
                 .val(item.empTypeLevelId)
                 .text(item.empTypeLevelName)
@@ -368,14 +398,14 @@ const listEmployeeJob = selected_form => {
           });
           if (selectedOption.hasOwnProperty("empjob")) {
             selected_form
-              .find("select[name=empjob]")
+              .find(".empjobList")
               .val(selectedOption.empjob)
               .change();
           }
         } else {
-          selected_form.find("select[name=empjob]").attr("disabled", true);
+          selected_form.find(".empjobList").attr("disabled", true);
           selected_form
-            .find("select[name=empjob]")
+            .find(".empjobList")
             .find("option")
             .remove()
             .end()
@@ -398,20 +428,20 @@ const listEmployeeJob = selected_form => {
 const listEmployeeLevel = selected_form => {
   return new Promise((resolve, reject) => {
     const selected_type = selected_form
-      .find("select[name=emptype] option:selected")
+      .find(".emptypeList option:selected")
       .val();
     if (selected_type == "1") {
       $.get("https://172.19.0.250/listEmployeeLevel")
         .done(data => {
           if (data.length > 0) {
-            selected_form.find("select[name=emplevel]").attr("disabled", false);
+            selected_form.find(".emplevelList").attr("disabled", false);
             selected_form
-              .find("select[name=emplevel]")
+              .find(".emplevelList")
               .find("option")
               .remove()
               .end();
             data.forEach(item => {
-              selected_form.find("select[name=emplevel]").append(
+              selected_form.find(".emplevelList").append(
                 $("<option />")
                   .val(item.levelId)
                   .text(item.levelName)
@@ -419,14 +449,14 @@ const listEmployeeLevel = selected_form => {
             });
             if (selectedOption.hasOwnProperty("emplevel")) {
               selected_form
-                .find("select[name=emplevel]")
+                .find(".emplevelList")
                 .val(selectedOption.emplevel)
                 .change();
             }
           } else {
-            selected_form.find("select[name=emplevel]").attr("disabled", true);
+            selected_form.find(".emplevelList").attr("disabled", true);
             selected_form
-              .find("select[name=emplevel]")
+              .find(".emplevelList")
               .find("option")
               .remove()
               .end()
@@ -444,9 +474,9 @@ const listEmployeeLevel = selected_form => {
           reject("Cannot get level");
         });
     } else {
-      selected_form.find("select[name=emplevel]").attr("disabled", true);
+      selected_form.find(".emplevelList").attr("disabled", true);
       selected_form
-        .find("select[name=emplevel]")
+        .find(".emplevelList")
         .find("option")
         .remove()
         .end()
@@ -465,14 +495,14 @@ const listEmployeePosition = selected_form => {
     $.get("https://172.19.0.250/listEmployeePosition")
       .done(data => {
         if (data.length > 0) {
-          selected_form.find("select[name=emppos]").attr("disabled", false);
+          selected_form.find(".empposList").attr("disabled", false);
           selected_form
-            .find("select[name=emppos]")
+            .find(".empposList")
             .find("option")
             .remove()
             .end();
           data.forEach(item => {
-            selected_form.find("select[name=emppos]").append(
+            selected_form.find(".empposList").append(
               $("<option />")
                 .val(item.PositionId)
                 .text(item.PositionName)
@@ -480,14 +510,14 @@ const listEmployeePosition = selected_form => {
           });
           if (selectedOption.hasOwnProperty("emppos")) {
             selected_form
-              .find("select[name=emppos]")
+              .find(".empposList")
               .val(selectedOption.emppos)
               .change();
           }
         } else {
-          selected_form.find("select[name=emppos]").attr("disabled", true);
+          selected_form.find(".empposList").attr("disabled", true);
           selected_form
-            .find("select[name=emppos]")
+            .find(".empposList")
             .find("option")
             .remove()
             .end()
@@ -515,31 +545,39 @@ const resolveEmployee = selected_form => {
       .done(data => {
         const personal_data = data.person_data;
         const app_data = data.app;
-        selected_form.find("img").each((index, element) => {
-          $(element).attr("src", personal_data[$(element).attr("id")]);
-        });
+        const exceptClass = [
+          "form-control",
+          "custom-control-input",
+          "mr-3",
+          "custom-select"
+        ];
+        selected_form.find(".identPic").attr("src", personal_data["photo"]);
         selected_form.find("input").each((index, element) => {
-          const input_name = $(element).attr("name");
-          let input_type = $(element).attr("type");
-          if (!input_type) {
-            input_type = "text";
-          }
-          if (input_type == "text") {
-            if (!$(element).is("img")) {
-              $(element).val(personal_data[input_name]);
-            }
-          } else if (input_type == "checkbox") {
-            $(element).prop("checked", Boolean(Number(app_data[input_name])));
+          let elementInputClass = $(element)
+            .attr("class")
+            .split(" ");
+          elementInputClass = elementInputClass.filter(el => {
+            return !exceptClass.includes(el);
+          });
+          const selectedClass = "." + elementInputClass.join();
+          if ($(element).prop("type") == "text") {
+            selected_form
+              .find(selectedClass)
+              .val(personal_data[elementInputClass.join()]);
+          } else {
+            selected_form
+              .find(selectedClass)
+              .prop(
+                "checked",
+                Boolean(app_data[elementInputClass.join().replace("List", "")])
+              );
           }
         });
-        selected_form.find("select").each((index, element) => {
-          const input_name = $(element).attr("name");
-          selectedOption[input_name] = personal_data[input_name];
-        });
+        selectedOption = data.office;
         resolve();
       })
       .fail(() => {
-        console.error("Can't resolve user");
+        reject("Can't resolve user");
       });
   });
 };
@@ -653,7 +691,7 @@ const insertFormSubmit = e => {
   personData.selected_system = enabled_system;
   if (personData != null) {
     $.post(
-      "https://172.19.0.250/addEmployee",
+      "https://172.19.0.250/insertEmployee",
       { employeeData: personData },
       (data, status) => {
         $("#idInsertModal").modal("hide");
@@ -665,14 +703,39 @@ const insertFormSubmit = e => {
   }
 };
 
+const updateChatscreen = msg => {
+  let chatName = $(
+    "<span class='direct-chat-name pull-left'>" + msg.owner + "</span>"
+  );
+  let chatTime = $(
+    "<span class='direct-chat-timestamp pull-right'> " +
+      msg.timeStamp +
+      "</span>"
+  );
+  let chatNameNStamp = $("<div class='direct-chat-info clearfix'>");
+  chatNameNStamp.append(chatName);
+  chatNameNStamp.append(chatTime);
+
+  let chatText = $("<div class='direct-chat-text'>" + msg.text + "</div>");
+  let chatMsg;
+  if (msg.local) {
+    chatMsg = $("<div class='direct-chat-msg right'>");
+  } else {
+    chatMsg = $("<div class='direct-chat-msg'>");
+  }
+  chatMsg.append(chatNameNStamp);
+  chatMsg.append(chatText);
+  $("#chatScreen").append(chatMsg);
+};
+
 $(document).on("shown.bs.modal", "#idInsertModal", showInsertModalEvent);
-$(document).on("click", "#readCard", e => {
+$(document).on("click", ".readCard", e => {
   e.preventDefault();
   wSocket.send(JSON.stringify({ Action: "retreivedData" }));
 });
-$(document).on("change", "select[name=section]", sectionChangeEvent);
-$(document).on("change", "select[name=department]", departmentChangeEvent);
-$(document).on("change", "select[name=emptype]", emptypeChangeEvent);
+$(document).on("change", ".sectionList", sectionChangeEvent);
+$(document).on("change", ".departmentList", departmentChangeEvent);
+$(document).on("change", ".emptypeList", emptypeChangeEvent);
 $(document).on("shown.bs.modal", "#idUpdateModal", showUpdateModalEvent);
 $(document).on("click", "#selectOfficer", function() {
   selectedUser = userTable.row($(this).parents("tr")).data();
@@ -680,3 +743,118 @@ $(document).on("click", "#selectOfficer", function() {
 });
 $(document).on("submit", "#identityForm", insertFormSubmit);
 $(document).on("submit", "form[id=identityUpdateForm]", e => {});
+$(document).on("click", "#modalChatShow", e => {
+  const clickedElement = e.currentTarget;
+  const user_chat_name = $(clickedElement).data("userchat");
+  $("#chatModal .modal-title").text(user_chat_name);
+  $("#chatModal").modal("show");
+});
+$(document).on("shown.bs.dropdown", "#chatDropDown", e => {
+  let chatMsgList = $("#chatMsgList");
+  chatMsgList.empty();
+  $.get("https://172.19.0.250/listUserContacts").done(contact_list => {
+    contact_list.forEach(contact => {
+      const contactName = contact.th_firstname + " " + contact.th_lastname;
+      let chatMsgInnerBody = $("<div class='media-body'>");
+      chatMsgInnerBody.append(
+        $(
+          "<h3 class='dropdown-item-title'>  " +
+            contactName +
+            "<span class='float-right text-sm text-danger'></span></h3>"
+        )
+      );
+      chatMsgInnerBody.append(
+        $("<p class='text-sm'>Call me whenever you can...</p>")
+      );
+      chatMsgInnerBody.append(
+        $(
+          " <p class='text-sm text-muted'>" +
+            "<i class='far fa-clock mr-1'></i> 4 Hours Ago</p>"
+        )
+      );
+
+      let chatMsgInner = $("<div class='media'>");
+      chatMsgInner.append(
+        $(
+          "<img src=" +
+            contact.photoRaw +
+            " alt='contacts' class='img-size-50 mr-3 img-circle' />"
+        )
+      );
+      chatMsgInner.append(chatMsgInnerBody);
+
+      let chatMsgBlock = $("<a class='dropdown-item chatContacts' href='#' >");
+      chatMsgBlock.data("uuid", contact.AD_UUID);
+      chatMsgBlock.append(chatMsgInner);
+      chatMsgList.append(chatMsgBlock);
+    });
+
+    chatMsgList.append(
+      $(
+        "<div class='dropdown-divider'></div><a href='#' class='dropdown-item dropdown-footer'>อ่านข้อความทั้งหมด</a>"
+      )
+    );
+  });
+
+  let chatMsgDevide = $("<div class='dropdown-divider'>");
+});
+
+$(document).on("click", ".chatContacts", e => {
+  $("#chatModal .modal-title").text(
+    "กล่อง chat " +
+      $(e.currentTarget)
+        .find(".dropdown-item-title")
+        .text()
+  );
+  $("#chatModal").data("uuid", $(e.currentTarget).data("uuid"));
+  $("#chatModal").modal("show");
+});
+$(document).on("shown.bs.modal", "#chatModal", e => {
+  const selectedUUID = $(e.currentTarget).data("uuid");
+  $.get("https://172.19.0.250/retreiveChatMsg").done(msgBlock => {
+    if (msgBlock) {
+      chatMsgObject[selectedUUID] = [];
+      msgBlock[selectedUUID].forEach(message => {
+        chatMsgObject[selectedUUID].push(message[0]);
+        updateChatscreen(message[0]);
+      });
+    }
+  });
+});
+$(document).on("hide.bs.modal", "#chatModal", e => {
+  $("#chatScreen").empty();
+  $.post("https://172.19.0.250/updateChatMsg", { msgPack: chatMsgObject }).done(
+    () => {
+      chatMsgObject = {};
+    }
+  );
+});
+$(document).on("submit", "#chatForm", e => {
+  e.preventDefault();
+  const destinationUUID = $(e.currentTarget)
+    .parents()
+    .find("#chatModal")
+    .data("uuid");
+  const msg = {
+    owner: localStorage.getItem("chatUUID"),
+    text: $(".chatText").val(),
+    local: true,
+    timeStamp: moment().format("lll"),
+    destClient: destinationUUID
+  };
+  if (!chatMsgObject.hasOwnProperty(destinationUUID)) {
+    chatMsgObject[destinationUUID] = [];
+  }
+  chatMsgObject[destinationUUID].push(msg);
+  updateChatscreen(msg);
+  wSocket.send(
+    JSON.stringify({
+      Action: "sendChat",
+      Data: {
+        owner: localStorage.getItem("chatUUID"),
+        msg: $(".chatText").val(),
+        destClient: destinationUUID
+      }
+    })
+  );
+});

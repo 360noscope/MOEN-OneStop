@@ -21,18 +21,6 @@ const bindClient = (username, password) => {
   });
 };
 
-const unbindClient = () => {
-  return new Promise((resolve, reject) => {
-    ldapClient.unbind(err => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
-  });
-};
-
 //sub method need to bind client from another function!!
 const listUser = () => {
   return new Promise((resolve, reject) => {
@@ -490,13 +478,8 @@ const insertUser = userData => {
       })
       .then(userUUID => {
         userData.UserUUID = userUUID;
+        ldap.unbind();
         return clientDatabaseUpdate(userData);
-      })
-      .then(() => {
-        return unbindClient();
-      })
-      .then(() => {
-        resolve();
       })
       .catch(err => {
         reject(err);
@@ -506,7 +489,6 @@ const insertUser = userData => {
 
 const getUserList = () => {
   return new Promise((resolve, reject) => {
-    let result;
     bindClient(
       `${settingEnv.AD_API_ACCOUNT}@energy.local`,
       settingEnv.AD_API_PASSWORD
@@ -515,12 +497,10 @@ const getUserList = () => {
         return listUser();
       })
       .then(search_result => {
-        result = search_result;
-        return unbindClient();
+        ldapClient.unbind();
+        resolve(search_result);
       })
-      .then(() => {
-        resolve(result);
-      })
+
       .catch(err => {
         reject(err);
       });
@@ -529,7 +509,6 @@ const getUserList = () => {
 
 const getGroupList = () => {
   return new Promise((resolve, reject) => {
-    let result;
     bindClient(
       `${settingEnv.AD_API_ACCOUNT}@energy.local`,
       settingEnv.AD_API_PASSWORD
@@ -538,11 +517,8 @@ const getGroupList = () => {
         return listGroup();
       })
       .then(search_result => {
-        result = search_result;
-        return unbindClient();
-      })
-      .then(() => {
-        resolve(result);
+        ldapClient.unbind();
+        resolve(search_result);
       })
       .catch(err => {
         reject(err);
@@ -552,7 +528,6 @@ const getGroupList = () => {
 
 const getOUList = () => {
   return new Promise((resolve, reject) => {
-    let result;
     bindClient(
       `${settingEnv.AD_API_ACCOUNT}@energy.local`,
       settingEnv.AD_API_PASSWORD
@@ -561,11 +536,8 @@ const getOUList = () => {
         return listOU();
       })
       .then(search_result => {
-        result = search_result;
-        return unbindClient();
-      })
-      .then(() => {
-        resolve(result);
+        ldapClient.unbind();
+        resolve(search_result);
       })
       .catch(err => {
         reject(err);
