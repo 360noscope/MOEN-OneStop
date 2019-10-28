@@ -25,7 +25,7 @@ const checkAuth = (req, res, next) => {
       }
     }
   } else {
-    res.render(process.env.LOGIN_PAGE);
+    res.render("signin.html");
   }
 };
 

@@ -40,13 +40,18 @@ const resolveOfficer = Officer.resolveOfficer;
 const insertEmployee = Ldap.insertUser;
 const listUserContacts = Officer.listUserContacts;
 
+const Chat = require("./Chat");
+const chatRecord = Chat.chatRecord;
+const chatReader = Chat.chatRead;
+const nameTranslate = Chat.uuidTranslator;
+
 module.exports = {
   //LDAP API def
   getUserList: getUserList,
   getGroupList: getGroupList,
   getOUList: getOUList,
   ldapLogin: ldapLogin,
-
+  //end LDAP def
   listOfficer: listOfficer,
   listSection: listSection,
   listDept: listDept,
@@ -59,6 +64,10 @@ module.exports = {
   isUserExists: isUserExists,
   resolveOfficer: resolveOfficer,
   listUserContacts: listUserContacts,
+  chatRecord: chatRecord,
+  chatReader: chatReader,
+  nameTranslate: nameTranslate,
+
   checkAPIUserRole: checkAPIUserRole,
   listAPIKey: listAPIKey,
   insertAPI: insertAPI,

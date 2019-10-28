@@ -9,6 +9,7 @@ $(document).on("submit", "#signinForm", e => {
     authPassword: password
   })
     .done(data => {
+      console.log("test");
       if (data.loginStatus == true) {
         localStorage.setItem("chatUUID", data.uuid);
         window.location.replace("/home");

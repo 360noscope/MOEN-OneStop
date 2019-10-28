@@ -67,20 +67,20 @@ module.exports = app => {
       const testReq = req.body;
       redisKey = redisKey + testReq[keyList[req_url]["selective"]];
     }
-    Cacher.cacheRetreive(redisKey)
+    Cacher.cacheRetreive(redisKey, 1)
       .then(data => {
         if (data) {
           res.send(data);
         } else {
           if (checkMethodArgs(keyList[req_url]["fetchMethod"]).length == 0) {
             keyList[req_url]["fetchMethod"]().then(search_result => {
-              Cacher.cacheUpdate(redisKey, search_result);
+              Cacher.cacheUpdate(redisKey, 1, search_result);
               res.send(search_result);
             });
           } else {
             const reqParam = req.body;
             keyList[req_url]["fetchMethod"](reqParam).then(search_result => {
-              Cacher.cacheUpdate(redisKey, search_result);
+              Cacher.cacheUpdate(redisKey, 1, search_result);
               res.send(search_result);
             });
           }
@@ -113,7 +113,39 @@ module.exports = app => {
         res.send({ loginStatus: false });
       });
   };
-
+  const updateChat = (req, res) => {
+    operator
+      .chatRecord(req.body.uuid, req.body.msgBlock)
+      .then(() => {
+        res.send("Sent!");
+      })
+      .catch(err => {
+        res.send(err);
+      });
+  };
+  const readChat = (req, res) => {
+    operator
+      .chatReader(req.body.owner, req.body.destination)
+      .then(chatData => {
+        res.send(chatData);
+      })
+      .catch(err => {
+        res.send(err);
+      });
+  };
+  const translateName = (req, res) => {
+    console.log(req.body.uuid);
+    operator
+      .nameTranslate(req.body.uuid)
+      .then(name => {
+        if (name != false) {
+          res.send(name);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
   app.post("/auth", handleAuthenRequest);
   app.get("/signout", sessionChecker.checkAuth, (req, res) => {
@@ -126,7 +158,7 @@ module.exports = app => {
         Pragma: "no-cache",
         Expires: "0"
       });
-      res.render(process.env.LOGIN_PAGE);
+      res.render("signin.html");
     });
   });
   app.get("/listOfficer", sessionChecker.checkAuth, handleFormRequest);
@@ -154,8 +186,9 @@ module.exports = app => {
       res.send(search_result);
     });
   });
-  app.get("/retreiveChatMsg", sessionChecker.checkAuth, acquiredChatMsg);
-  app.post("/updateChatMsg", sessionChecker.checkAuth, updateChatMsg);
+  app.post("/retreiveChatMsg", sessionChecker.checkAuth, readChat);
+  app.post("/updateChatMsg", sessionChecker.checkAuth, updateChat);
+  app.post("/translateName", sessionChecker.checkAuth, translateName);
   app.post("/listAPIKey", sessionChecker.checkAuth, (req, res) => {
     operator.listAPIKey(req.session.UUID, result => {
       res.send(result);

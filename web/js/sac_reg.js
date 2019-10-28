@@ -1,5 +1,7 @@
-let userTable, wSocket, personData;
-let chatMsgObject = {};
+let userTable,
+  wSocket,
+  personData,
+  newMsgCount = 0;
 
 $(document).ready(() => {
   const wsCheck = () => {
@@ -45,14 +47,9 @@ $(document).ready(() => {
           $("#identityForm .identPic").attr("src", returnData.Picture);
           break;
         case "chatMsg":
-          if (!chatMsgObject.hasOwnProperty(returnData.msgOwner)) {
-            chatMsgObject[returnData.msgOwner] = [];
+          if ((msg.local = true)) {
+            newMsgCount++;
           }
-          chatMsgObject[returnData.msgOwner].push(returnData);
-          if (!chatMsgObject.hasOwnProperty(returnData.msgOwner)) {
-            chatMsgObject[returnData.msgOwner] = [];
-          }
-          chatMsgObject[returnData.msgOwner].push(returnData);
           let chatName = $(
             "<span class='direct-chat-name pull-left'>" + msg.owner + "</span>"
           );
@@ -77,6 +74,9 @@ $(document).ready(() => {
           chatMsg.append(chatNameNStamp);
           chatMsg.append(chatText);
           $("#chatScreen").append(chatMsg);
+          if (newMsgCount > 0) {
+            $(".chatNoti").text(newMsgCount);
+          }
           break;
         case "error":
           if (returnData == "NO_READER") {
@@ -704,28 +704,32 @@ const insertFormSubmit = e => {
 };
 
 const updateChatscreen = msg => {
-  let chatName = $(
-    "<span class='direct-chat-name pull-left'>" + msg.owner + "</span>"
-  );
-  let chatTime = $(
-    "<span class='direct-chat-timestamp pull-right'> " +
-      msg.timeStamp +
-      "</span>"
-  );
-  let chatNameNStamp = $("<div class='direct-chat-info clearfix'>");
-  chatNameNStamp.append(chatName);
-  chatNameNStamp.append(chatTime);
+  $.post("https://172.19.0.250/translateName", { uuid: msg.owner }).done(
+    data_response => {
+      let chatName = $(
+        "<span class='direct-chat-name pull-left'>" + data_response + "</span>"
+      );
+      let chatTime = $(
+        "<span class='direct-chat-timestamp pull-right'> " +
+          msg.timeStamp +
+          "</span>"
+      );
+      let chatNameNStamp = $("<div class='direct-chat-info clearfix'>");
+      chatNameNStamp.append(chatName);
+      chatNameNStamp.append(chatTime);
 
-  let chatText = $("<div class='direct-chat-text'>" + msg.text + "</div>");
-  let chatMsg;
-  if (msg.local) {
-    chatMsg = $("<div class='direct-chat-msg right'>");
-  } else {
-    chatMsg = $("<div class='direct-chat-msg'>");
-  }
-  chatMsg.append(chatNameNStamp);
-  chatMsg.append(chatText);
-  $("#chatScreen").append(chatMsg);
+      let chatText = $("<div class='direct-chat-text'>" + msg.text + "</div>");
+      let chatMsg;
+      if (msg.local) {
+        chatMsg = $("<div class='direct-chat-msg right'>");
+      } else {
+        chatMsg = $("<div class='direct-chat-msg'>");
+      }
+      chatMsg.append(chatNameNStamp);
+      chatMsg.append(chatText);
+      $("#chatScreen").append(chatMsg);
+    }
+  );
 };
 
 $(document).on("shown.bs.modal", "#idInsertModal", showInsertModalEvent);
@@ -751,6 +755,8 @@ $(document).on("click", "#modalChatShow", e => {
 });
 $(document).on("shown.bs.dropdown", "#chatDropDown", e => {
   let chatMsgList = $("#chatMsgList");
+  $(".chatNoti").text("");
+  newMsgCount = 0;
   chatMsgList.empty();
   $.get("https://172.19.0.250/listUserContacts").done(contact_list => {
     contact_list.forEach(contact => {
@@ -811,23 +817,17 @@ $(document).on("click", ".chatContacts", e => {
 });
 $(document).on("shown.bs.modal", "#chatModal", e => {
   const selectedUUID = $(e.currentTarget).data("uuid");
-  $.get("https://172.19.0.250/retreiveChatMsg").done(msgBlock => {
-    if (msgBlock) {
-      chatMsgObject[selectedUUID] = [];
-      msgBlock[selectedUUID].forEach(message => {
-        chatMsgObject[selectedUUID].push(message[0]);
-        updateChatscreen(message[0]);
-      });
-    }
+  $.post("https://172.19.0.250/retreiveChatMsg", {
+    owner: localStorage.getItem("chatUUID"),
+    destination: selectedUUID
+  }).done(msgBlock => {
+    msgBlock.forEach(msg => {
+      updateChatscreen(msg);
+    });
   });
 });
 $(document).on("hide.bs.modal", "#chatModal", e => {
   $("#chatScreen").empty();
-  $.post("https://172.19.0.250/updateChatMsg", { msgPack: chatMsgObject }).done(
-    () => {
-      chatMsgObject = {};
-    }
-  );
 });
 $(document).on("submit", "#chatForm", e => {
   e.preventDefault();
@@ -839,14 +839,16 @@ $(document).on("submit", "#chatForm", e => {
     owner: localStorage.getItem("chatUUID"),
     text: $(".chatText").val(),
     local: true,
-    timeStamp: moment().format("lll"),
+    timeStamp: moment().format("D-M-YYYY, h:mm:ss a"),
     destClient: destinationUUID
   };
-  if (!chatMsgObject.hasOwnProperty(destinationUUID)) {
-    chatMsgObject[destinationUUID] = [];
-  }
-  chatMsgObject[destinationUUID].push(msg);
   updateChatscreen(msg);
+  $.post("https://172.19.0.250/updateChatMsg", {
+    uuid: localStorage.getItem("chatUUID"),
+    msgBlock: msg
+  }).done(response => {
+    console.log(response);
+  });
   wSocket.send(
     JSON.stringify({
       Action: "sendChat",

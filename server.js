@@ -8,6 +8,8 @@ const session = require("express-session");
 const moment = require("moment");
 const dotenv = require("dotenv");
 const app = express();
+const sessionClient = require("redis").createClient();
+const redisStore = require("connect-redis")(session);
 const mustacheExpress = require("mustache-express");
 dotenv.config();
 
@@ -25,6 +27,12 @@ app.use(
   session({
     resave: true,
     secret: process.env.SESSION_SECRET,
+    store: new redisStore({
+      host: "localhost",
+      port: 6379,
+      client: sessionClient,
+      ttl: 260
+    }),
     saveUninitialized: true
   })
 );
@@ -106,7 +114,8 @@ wss.on("connection", (socket, incoming_request) => {
                 data: {
                   owner: msgObj.owner,
                   text: msgObj.msg,
-                  timeStamp: moment().format("lll"),
+                  timeStamp: moment().format("D-M-YYYY, h:mm:ss a"),
+                  destClient: msgObj.destClient,
                   local: false
                 }
               })

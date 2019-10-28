@@ -6,8 +6,7 @@ const mysqlPool = mysql.createPool({
   user: settingEnv.MARIA_USERNAME,
   password: settingEnv.MARIA_PASSWORD,
   database: settingEnv.MARIA_DB,
-  port: settingEnv.MARIA_PORT,
-  multipleStatements: true
+  port: settingEnv.MARIA_PORT
 });
 
 module.exports = mysqlPool;

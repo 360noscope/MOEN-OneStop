@@ -166,7 +166,7 @@ const ldapLogin = (username, password) => {
                   });
                 }
                 searchCitizen(converter.GUIDtoUUID(user.objectGUID)).then(
-                  (search_result) => {
+                  search_result => {
                     const adminRight =
                       groupList.includes("Administrators") ||
                       groupList.includes("Domain Admins");
